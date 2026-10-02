@@ -97,7 +97,9 @@ tools/web, use actual available session tools and ingest their reviewed evidence
 
 Health distinguishes detected, configured and validated. Only a successful live
 orchestrator run writes a per-capability receipt to ignored `.web-tools/health.json`;
-it expires after 24 hours. A configuration entry is never READY. Receipts attest one
+it expires after 24 hours. Failed attempts remove the attempted capability receipt
+and report LAST_ATTEMPT_FAILED until a subsequent success or expiry. Health does
+not probe the network: reachable_now remains unknown. A configuration entry is never READY. Receipts attest one
 source/task at that time, not every site, runtime version or account capability.
 Cached success does not create a new validation receipt. LinkedIn status is reported
 separately and currently Manual without actual account reads.
@@ -118,6 +120,8 @@ collapses URL/platform/content duplicates without losing provider/date/hash obse
 
 `research/cache.json` is separate from LinkedIn imports and confirmed history. Task
 age budgets determine cache reuse; stale returned packets cannot satisfy fresh requests.
+Requests with extraction selectors always retrieve the requested fields, and click
+steps always require an interaction provider, even on retrieve_url requests.
 A zero budget requires retrieval during the current operation. Historical evidence can
 still be explicitly imported for a historical question, but is never relabelled current.
 

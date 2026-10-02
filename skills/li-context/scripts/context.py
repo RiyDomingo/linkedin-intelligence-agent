@@ -44,11 +44,13 @@ def initialize(root):
     paths = [p for p in TEMPLATES.rglob('*') if p.is_file()]
     # Preflight all paths before any write; never replace existing profile data.
     targets = [(p, safe_path(root, p.relative_to(TEMPLATES))) for p in paths]
+    safe_path(root, '.').mkdir(parents=True, exist_ok=True, mode=0o700)
     created = []
     for source, target in targets:
-        target.parent.mkdir(parents=True, exist_ok=True)
+        target.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
         try:
-            with target.open('x', encoding='utf-8') as fh:
+            fd = os.open(target, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+            with os.fdopen(fd, 'w', encoding='utf-8') as fh:
                 fh.write(read_text(source))
             created.append(str(target.relative_to(Path(root).absolute().parent.resolve() / Path(root).absolute().name)))
         except FileExistsError:
@@ -119,7 +121,8 @@ def append_history(root, record, published=False, kind='posts'):
     record.setdefault('metrics', {})
     validate_record(record)
     path = safe_path(root, f'history/{kind}.jsonl')
-    path.parent.mkdir(parents=True, exist_ok=True)
+    safe_path(root, '.').mkdir(parents=True, exist_ok=True, mode=0o700)
+    path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
     # Serialize writers on supported Unix systems; no shared database required.
     try:
         import fcntl

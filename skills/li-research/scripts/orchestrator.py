@@ -37,6 +37,7 @@ class Provider:
     reliability: str = 'UNMEASURED'
     validated: frozenset = frozenset()
     retrieve: object = None
+    last_failure: str = None
 
 
 class RetrievalFailure(Exception):
@@ -92,6 +93,14 @@ def request(value):
     for step in steps:
         if not isinstance(step, dict) or set(step) != {'action', 'target'} or step['action'] != 'click' or not isinstance(step['target'], str):
             raise ValueError('Only explicit trusted click inspection steps are supported')
+    if steps and operation not in ('retrieve_url', 'browse_interactively'):
+        raise ValueError('Click steps require a page inspection operation')
+    if selectors and operation not in ('retrieve_url', 'extract_structured'):
+        raise ValueError('Selectors require page retrieval or structured extraction')
+    if selectors and (steps or operation == 'browse_interactively' or output['interaction_required'] or output['javascript_required']):
+        raise ValueError('Combined browser inspection and structured extraction is unsupported')
+    if steps:
+        output['interaction_required'] = True
     if (output['javascript_required'] or output['interaction_required']) and operation not in ('retrieve_url', 'browse_interactively'):
         raise ValueError('Combined crawl/search/structured rendering is not supported by this adapter')
     return output
@@ -159,7 +168,7 @@ def execute(value, providers, root, now=None):
     plan = choose(req, providers)
     if plan['state'] in ('NO_RETRIEVAL', 'LINKEDIN_READER'):
         return {'state': plan['state'], 'evidence': [], 'attempts': [], 'decision': plan}
-    if req.get('url') and not req.get('steps') and not req['javascript_required'] and not req['interaction_required'] and req['operation'] == 'retrieve_url':
+    if req.get('url') and not req.get('steps') and not req.get('selectors') and not req['javascript_required'] and not req['interaction_required'] and req['operation'] == 'retrieve_url':
         cached = [r for r in load(root) if r['url'] == req['url'] and is_fresh(r, req['max_age_hours'], now)]
         if cached and req['max_age_hours'] > 0:
             return {'state': 'CACHED', 'evidence': cached, 'attempts': [], 'decision': {'reason': 'Task freshness budget satisfied'}}
@@ -196,10 +205,11 @@ def execute(value, providers, root, now=None):
 
 def health(providers):
     return [{'provider': p.id, 'detected': p.available, 'configured': p.enabled,
-             'status': 'DISABLED' if not p.enabled else 'UNAVAILABLE' if not p.available else 'VALIDATED' if p.validated else 'AVAILABLE_UNVALIDATED',
+             'status': 'DISABLED' if not p.enabled else 'UNAVAILABLE' if not p.available else 'LAST_ATTEMPT_FAILED' if p.last_failure else 'VALIDATED' if p.validated else 'AVAILABLE_UNVALIDATED',
+             'last_failure': p.last_failure, 'reachable_now': None,
              'capabilities': sorted(p.capabilities), 'validated_capabilities': sorted(p.validated & p.capabilities),
              'cost': p.cost, 'latency': p.latency, 'reliability': p.reliability,
-             'note': 'Tool/source validation never grants LinkedIn account access'} for p in providers]
+             'note': 'No live probe; recent receipts attest only tested sources. Tool/source validation never grants LinkedIn account access'} for p in providers]
 
 
 def stages(intent, external_needed=False):

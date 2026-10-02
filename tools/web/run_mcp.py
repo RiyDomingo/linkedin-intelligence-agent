@@ -12,15 +12,22 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def browser_path():
     receipt = ROOT / '.web-tools/browser.json'
+    if receipt.is_symlink() or receipt.parent.is_symlink():
+        raise ValueError('Symlinked browser receipt refused')
     if not receipt.is_file():
         raise ValueError('Browser not configured; follow docs/CODEX_WEB_TOOLING.md')
     path = Path(json.loads(receipt.read_text(encoding='utf-8'))['executable_path'])
-    if not path.is_file() or not path.is_relative_to(ROOT / '.web-tools/browsers'):
+    base = ROOT / '.web-tools/browsers'
+    if (not path.is_absolute() or '..' in path.parts or not path.is_file() or
+            not path.resolve().is_relative_to(base.resolve()) or
+            any(p.is_symlink() for p in (path, *path.parents) if p == ROOT or ROOT in p.parents)):
         raise ValueError('Browser executable must be the installed local build')
     return str(path)
 
 
 def launch_spec(component):
+    if component not in ('scrapling', 'playwright', 'brightdata'):
+        raise ValueError('Unsupported MCP component')
     env = dict(os.environ)
     if component == 'brightdata' and not env.get('API_TOKEN', '').strip():
         raise ValueError('Bright Data is disabled until API_TOKEN is supplied; local tools need no key')
@@ -28,13 +35,21 @@ def launch_spec(component):
     if component != 'brightdata':
         env.pop('API_TOKEN', None)
     if component == 'scrapling':
-        executable = ROOT / '.venv/bin/scrapling-mcp'
-        args = [str(executable), '--executable-path', browser_path()]
+        executable = ROOT / '.venv/bin/python'
+        entrypoint = ROOT / '.venv/bin/scrapling-mcp'
+        if not entrypoint.is_file():
+            raise ValueError('Optional Scrapling entrypoint missing')
+        # Invoke with the current interpreter; generated shebangs can retain
+        # an obsolete checkout path after a directory rename.
+        args = [str(executable), str(entrypoint), '--executable-path', browser_path()]
     else:
         executable = shutil.which('node')
         if not executable:
             raise ValueError('Node.js is unavailable in the Codex launch environment')
         if component == 'playwright':
+            # Enforce the same read/network guard for every launcher caller.
+            env['PLAYWRIGHT_MCP_INIT_PAGE'] = str(ROOT / 'tools/web/public_guard.cjs')
+            env['PLAYWRIGHT_MCP_BLOCK_SERVICE_WORKERS'] = 'true'
             cli = ROOT / 'tools/web/node_modules/@playwright/mcp/cli.js'
             args = [executable, str(cli), '--headless', '--isolated',
                     '--executable-path', browser_path(), '--idle-timeout', '60000',

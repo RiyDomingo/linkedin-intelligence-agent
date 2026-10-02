@@ -421,6 +421,24 @@ class IntelligenceTests(unittest.TestCase):
         network['assessment']={'can_contribute':True,'relevance':1}
         ingest(self.root,envelope([item(),network,comment]),now=NOW)
         self.assertEqual([a['category'] for a in brief(self.root,NOW)['actions']],['RESPOND','COMMENT'])
+    def test_cross_provider_reply_retains_all_observations(self):
+        c=item('comment','reply','own_comments',text='Have you measured the review change?')
+        c['assessment']={'reply_expected':True}
+        ingest(self.root,envelope([c]),now=NOW)
+        ingest(self.root,envelope([c],source=source(provider='second')),now=NOW)
+        actions=brief(self.root,NOW)['actions']
+        self.assertEqual(len(actions),1)
+        self.assertEqual({o['provider'] for o in actions[0]['observations']},{'manual-1','second'})
+    def test_private_duplicate_does_not_hide_public_reply(self):
+        c=item('comment','reply','own_comments',text='Have you measured the review change?')
+        c['assessment']={'reply_expected':True}
+        ingest(self.root,envelope([c]),now=NOW)
+        private=envelope([c],source=source(provider='private',visibility='private',retrieved_at='2026-10-02T10:00:00Z'))
+        ingest(self.root,private,allow_private=True,now=NOW)
+        actions=brief(self.root,NOW)['actions']
+        self.assertEqual(len(actions),1)
+        self.assertEqual(actions[0]['source']['visibility'],'public')
+        self.assertEqual(len(actions[0]['observations']),1)
 
     def test_stale_data_no_urgency(self):
         comment=item('comment','c1','own_comments',parent_post='p1',timestamp='2026-09-01T08:00:00Z',text='Have you measured review time after the change?')
@@ -487,6 +505,11 @@ class IntelligenceTests(unittest.TestCase):
         self.assertEqual(observation['reactions'],100)
         self.assertIsNone(observation['opportunities'])
         self.assertIsNone(observation['meaningful_comments'])
+    def test_weekly_history_uses_same_rolling_window_as_read_activity(self):
+        for day in ('2026-09-25','2026-09-26','2026-10-02','2026-10-03'):
+            append_history(self.root,{'id':day,'date':day,'topic':'review','angle':'field','hook':'Checklist','body':'Actual published copy.','cta':''},True)
+        result=weekly(self.root,NOW)
+        self.assertEqual(result['published_posts'],2)
 
     def test_history_extended_metadata(self):
         append_history(self.root,{'id':'p1','date':'2026-10-01','topic':'review','angle':'new field','hook':'The checklist missed it.','body':'Actual copy.','cta':'','project':'Checklist','company':'Example Co','people_mentioned':['Example peer'],'evidence_used':['public-report']},True)

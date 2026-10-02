@@ -174,3 +174,13 @@ and assessments. `tools/web/research.py` connects installed optional providers.
 Provider health never grants LinkedIn access. Daily brief returns research_signals
 separately from supported LinkedIn actions; semantic ranking stays with Codex.
 See docs/ORCHESTRATION.md for the complete request and evidence contract.
+
+## Release-gate clarifications
+
+LinkedIn duplicate review views retain all source observations while choosing the
+newest canonical item. The default brief filters private read items before merging.
+The weekly helper uses the same rolling seven-day UTC window for confirmed history
+and dated imports; date-only history is interpreted at UTC midnight. Voice and
+claim gates remain semantic skill work rather than tested model classifiers.
+Provider health is an offline receipt view with explicit recent failures, never a
+live reachability assertion. See [the current release audit](docs/V1_RELEASE_AUDIT.md).

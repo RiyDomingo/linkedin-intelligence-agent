@@ -136,3 +136,23 @@ The private atomic research cache uses existing path/symlink protections and req
 one writer at a time. Successful capability receipts expire after one day and are
 observations of a tested task, not guarantees for all sources or runtime versions.
 No credential, CAPTCHA, login or authorization escalation occurs after failures.
+
+## V1 release repair pass (2026-10-02)
+
+See [the current audit](docs/V1_RELEASE_AUDIT.md) for findings, severity and evidence.
+Playwright guards are now enforced by the launcher for every caller; browser
+receipt traversal/symlink escapes and nonstandard browser destination ports are
+refused. New context templates use 0600 files and 0700 directories on Unix without
+altering existing permissions. Brief privacy filtering occurs before deduplication;
+private read duplicates cannot suppress public candidates or enter their provenance.
+Curated relationship notes are intentionally used in local brief/weekly review,
+including private notes; --include-private governs imported read items, not all
+curated local context. Weekly analytics can also be private retained data. No such
+context is passed automatically to external research adapters.
+
+Tracked secret-pattern and private-state checks were clean. npm's live advisory
+audit reported zero known vulnerabilities; Python dependency compatibility passed.
+No Python vulnerability scanner was available, so compatibility is not represented
+as a vulnerability audit. Prompt-injection tests verify untrusted data handling,
+not immunity of model reasoning. DNS check/connection races and generic upstream
+MCP tool policy limits remain as documented above.

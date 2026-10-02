@@ -217,3 +217,19 @@ to li-research. The existing configurations above remain intact. The optional
 `tools/web/research.py` bridge now provides unified `health`, `plan` and `run` rather
 than requiring four separate tool commands. See [ORCHESTRATION.md](ORCHESTRATION.md)
 for requests, capability detection, normalized evidence, caching and safe fallback.
+
+## Checkout moves and current release audit
+
+After renaming or moving a checkout, update the three generated launcher paths in
+`.codex/config.toml` and the executable path in `.web-tools/browser.json` to the
+existing local browser. Preserve unrelated configuration; do not rerun --write over
+matching server registrations. The Scrapling launcher uses the current local venv
+interpreter explicitly so a stale generated entrypoint shebang cannot break MCP.
+Other direct venv console commands may still need environment recreation after a
+move; do not assume a virtual environment is generally portable.
+
+Every Playwright launcher invocation now installs the fixed public-network/read
+guard and blocks service workers; this applies to smoke tests and direct Codex MCP
+launches as well as the bridge. Browser receipts reject traversal and symlinks.
+See [the current v1 audit](V1_RELEASE_AUDIT.md) for current check results; the
+installation observations above are historical.

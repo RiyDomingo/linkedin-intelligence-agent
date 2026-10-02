@@ -1,3 +1,6 @@
+Current release-gate results: [V1_RELEASE_AUDIT.md](docs/V1_RELEASE_AUDIT.md).
+The sections below preserve earlier validation and delivery snapshots.
+
 # LinkedIn migration validation record
 
 Date: 2026-10-02. Python standard-library suite, local checkout and temporary

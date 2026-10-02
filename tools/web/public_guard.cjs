@@ -12,6 +12,7 @@ module.exports.default = async ({ page }) => {
       const request = route.request();
       const url = new URL(request.url());
       if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password ||
+          (url.port && !['80', '443'].includes(url.port)) ||
           !['GET', 'HEAD'].includes(request.method()) ||
           /(^|\.)linkedin\.com\.?$/i.test(url.hostname) ||
           /(^|\.)(localhost|local|internal)\.?$/i.test(url.hostname)) throw new Error('boundary');

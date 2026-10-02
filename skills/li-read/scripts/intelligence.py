@@ -58,7 +58,7 @@ def relevance(text, terms):
     return [term for term in terms if tokens(term) and tokens(term).issubset(content)]
 
 
-def active_items(root, include_inactive=False):
+def active_items(root, include_inactive=False, include_private=True):
     disabled = {p['id'] for p in config(root)['providers'] if not p['enabled']}
     # Avoid double counting identical cross-provider items; least-invasive source wins.
     from read_layer import PRIORITY
@@ -67,10 +67,15 @@ def active_items(root, include_inactive=False):
     for item in items:
         if item['provenance']['provider'] in disabled or (not include_inactive and not item.get('active', True)):
             continue
+        if not include_private and (item['kind'] == 'message' or item['provenance']['visibility'] == 'private'):
+            continue
         key = (item['kind'], item['capability'], item['data'].get('url') or item['id'])
         prior = selected.get(key)
+        observations = [*(prior.get('observations', []) if prior else []), item['provenance']]
         if prior is None or parse_time(item['provenance']['retrieved_at']) > parse_time(prior['provenance']['retrieved_at']):
-            selected[key] = item
+            selected[key] = {**item, 'observations': observations}
+        else:
+            selected[key] = {**prior, 'observations': observations}
     return list(selected.values())
 
 
@@ -165,7 +170,7 @@ def brief(root, now=None, limit=5, include_private=False):
     now = now or datetime.now(timezone.utc)
     if not 0 <= limit <= 5:
         raise ValueError('brief limit must be between 0 and 5')
-    items = active_items(root)
+    items = active_items(root, include_private=include_private)
     context = build_context(root, items)
     actions, stale = [], []
     for item in items:
@@ -180,6 +185,7 @@ def brief(root, now=None, limit=5, include_private=False):
         actions.append({'id': item['id'], 'kind': item['kind'], 'category': classified['category'],
                         'score': classified['score'], 'rationale': classified['reason'], 'label': 'INFERRED',
                         'signal': item['data'].get('text'), 'source': item['provenance'],
+                        'observations': item['observations'],
                         'relationship': {'name': person['name'], 'type': person['relationship_type'],
                                          'last_meaningful_interaction': person['last_meaningful_interaction']} if person else None,
                         'freshness': classified['freshness'], 'draft': suggested_draft(item, classified['category'])})
@@ -226,8 +232,8 @@ def weekly(root, now=None):
     items = active_items(root)
     context = build_context(root, items)
     # Only canonical confirmed publication history. Imports do not silently become it.
-    published = [r for r in context['posts'] if cutoff.date() <= parse_time(r['date'], date_allowed=True).date() <= now.date()]
-    comments = [r for r in context['comments'] if cutoff.date() <= parse_time(r['date'], date_allowed=True).date() <= now.date()]
+    published = [r for r in context['posts'] if cutoff <= parse_time(r['date'], date_allowed=True) <= now]
+    comments = [r for r in context['comments'] if cutoff <= parse_time(r['date'], date_allowed=True) <= now]
     topics = Counter(r['topic'] for r in published)
     repeated = {topic: count for topic, count in topics.items() if count > 1}
     learning = []
@@ -278,7 +284,7 @@ def memory(root):
                         'claims': data.get('claims'), 'evidence_used': data.get('evidence_used'),
                         'related_research': data.get('related_research'),
                         'origin': item['provenance']['label'], 'confirmed_publication': False,
-                        'provenance': item['provenance']})
+                        'provenance': item['provenance'], 'observations': item['observations']})
     return records
 
 

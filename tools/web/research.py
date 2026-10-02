@@ -17,7 +17,7 @@ from urllib.robotparser import RobotFileParser
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'skills/li-research/scripts'))
-from orchestrator import Provider, RetrievalFailure, request, choose, execute, health
+from orchestrator import Provider, RetrievalFailure, request, choose, execute, health, FAILURES
 from evidence import public_url, timestamp, parse_time, signals, load
 
 
@@ -73,9 +73,6 @@ async def mcp_call(component, calls):
     from mcp import ClientSession, StdioServerParameters
     from mcp.client.stdio import stdio_client
     env = dict(os.environ)
-    if component == 'playwright':
-        env['PLAYWRIGHT_MCP_INIT_PAGE'] = str(ROOT / 'tools/web/public_guard.cjs')
-        env['PLAYWRIGHT_MCP_BLOCK_SERVICE_WORKERS'] = 'true'
     params = StdioServerParameters(command=sys.executable, env=env,
                                    args=[str(ROOT / 'tools/web/run_mcp.py'), component])
     results = []
@@ -109,6 +106,8 @@ def browser(req):
     import re
     match = re.search(r'Page URL: (\S+)', content)
     final = network_url(match.group(1)) if match else None
+    if final is None:
+        raise RetrievalFailure('PARSE_FAILURE')
     title = re.search(r'Page Title: (.+)', content)
     return [{'url': final, 'title': title.group(1) if title else None, 'content': content}]
 
@@ -165,6 +164,10 @@ def scrape(req):
         response = checked_get(url)
         results.append(packet(response))
         for link in response.css('a::attr(href)').getall():
+            # Bound the frontier as well as successful pages; denied links must
+            # not turn a small crawl into an unbounded robots/queue scan.
+            if len(seen) + len(queue) >= req['max_pages']:
+                break
             try:
                 candidate = public_url(urljoin(response.url, link))
             except ValueError:
@@ -189,7 +192,10 @@ def specialist(req):
     code = 'import json; from agent_reach.channels.v2ex import V2EXChannel; print(json.dumps(V2EXChannel().get_hot_topics(limit=3)))'
     env = dict(os.environ)
     env.pop('API_TOKEN', None)
-    result = subprocess.run([interpreter, '-c', code], env=env, capture_output=True, text=True, timeout=20)
+    try:
+        result = subprocess.run([interpreter, '-c', code], env=env, capture_output=True, text=True, timeout=20)
+    except subprocess.TimeoutExpired:
+        raise RetrievalFailure('TIMEOUT') from None
     if result.returncode:
         raise RetrievalFailure('NETWORK_ERROR')
     rows = json.loads(result.stdout)
@@ -235,6 +241,14 @@ def providers(root=".linkedin-agent"):
             if 0 <= age <= 86400:
                 result.add(cap)
         return frozenset(result)
+    def last_failure(name):
+        failure = validations.get(name, {}).get('last_failure')
+        if failure is None:
+            return None
+        if not isinstance(failure, dict) or failure.get('reason') not in FAILURES:
+            raise ValueError('Malformed provider failure receipt')
+        age = (datetime.now(timezone.utc) - parse_time(failure['at'])).total_seconds()
+        return failure['reason'] if 0 <= age <= 86400 else None
     scrapling = (ROOT / '.venv/bin/scrapling-mcp').is_file()
     try:
         from run_mcp import browser_path
@@ -244,27 +258,33 @@ def providers(root=".linkedin-agent"):
     playwright = (ROOT / 'tools/web/node_modules/@playwright/mcp/cli.js').is_file() and browser_binary and bool(shutil.which('node'))
     bright = (ROOT / 'tools/web/node_modules/@brightdata/mcp/server.js').is_file()
     return [Provider('scrapling', frozenset({'PAGE_FETCH', 'STRUCTURED_EXTRACTION'} | ({'CRAWL'} if research_settings.get('crawler_enabled', False) else set()) | ({'JAVASCRIPT'} if browser_binary else set())),
-                     scrapling, 'scrapling_local' in servers and servers['scrapling_local'].get('enabled', True), 'LOCAL', 0, validated=validated('scrapling'), retrieve=scrape),
+                     scrapling, 'scrapling_local' in servers and servers['scrapling_local'].get('enabled', True), 'LOCAL', 0, validated=validated('scrapling'), retrieve=scrape, last_failure=last_failure('scrapling')),
             Provider('playwright', frozenset({'PAGE_FETCH', 'INTERACTIVE_BROWSER'}), playwright,
-                     'playwright_local' in servers and servers['playwright_local'].get('enabled', True), 'LOCAL', 2, validated=validated('playwright'), retrieve=browser),
+                     'playwright_local' in servers and servers['playwright_local'].get('enabled', True), 'LOCAL', 2, validated=validated('playwright'), retrieve=browser, last_failure=last_failure('playwright')),
             Provider('agent_reach', frozenset({'SOCIAL_V2EX'}), bool(shutil.which('agent-reach')),
-                     research_settings.get('agent_reach_enabled', False), 'FREE_EXTERNAL', 1, validated=validated('agent_reach'), retrieve=specialist),
+                     research_settings.get('agent_reach_enabled', False), 'FREE_EXTERNAL', 1, validated=validated('agent_reach'), retrieve=specialist, last_failure=last_failure('agent_reach')),
             Provider('brightdata', frozenset({'PAGE_FETCH', 'SEARCH', 'BLOCKED_RETRIEVAL'}), bright,
                      servers.get('brightdata_fallback', {}).get('enabled', False) and bool(os.environ.get('API_TOKEN')),
-                     'METERED', 3, validated=validated('brightdata'), retrieve=managed)]
+                     'METERED', 3, validated=validated('brightdata'), retrieve=managed, last_failure=last_failure('brightdata'))]
 
 
 def record_validation(result):
-    if result['state'] != 'SUCCESS':
+    if not result.get('attempts'):
         return
-    chosen = result['decision']
     from read_layer import safe_path, read_text, atomic_save
     target = safe_path(ROOT, '.web-tools/health.json')
     rows = json.loads(read_text(target)) if target.exists() else {}
-    cap = chosen['capability']
-    row = rows.get(chosen['provider'], {'checks': {}})
-    row.setdefault('checks', {})[cap] = timestamp(datetime.now(timezone.utc))
-    rows[chosen['provider']] = row
+    for attempt in result['attempts']:
+        cap = attempt['decision']['capability']
+        row = rows.setdefault(attempt['provider'], {'checks': {}})
+        checks = row.setdefault('checks', {})
+        when = timestamp(datetime.now(timezone.utc))
+        if attempt['failure']:
+            checks.pop(cap, None)
+            row['last_failure'] = {'reason': attempt['failure'], 'at': when}
+        else:
+            checks[cap] = when
+            row.pop('last_failure', None)
     atomic_save(ROOT, '.web-tools/health.json', rows)
 
 

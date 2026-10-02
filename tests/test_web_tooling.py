@@ -80,6 +80,8 @@ class WebToolingTests(unittest.TestCase):
             self.assertNotIn('--storage-state', args)
             self.assertNotIn('--no-sandbox', args)
             self.assertNotIn('API_TOKEN', env)
+            self.assertEqual(env['PLAYWRIGHT_MCP_INIT_PAGE'], str(ROOT / 'tools/web/public_guard.cjs'))
+            self.assertEqual(env['PLAYWRIGHT_MCP_BLOCK_SERVICE_WORKERS'], 'true')
 
     def test_browser_receipt_outside_root_refused(self):
         with tempfile.TemporaryDirectory() as d, patch.object(runner, 'ROOT', Path(d)):
@@ -88,6 +90,34 @@ class WebToolingTests(unittest.TestCase):
             (root / 'other').write_text('data')
             (root / '.web-tools/browser.json').write_text(json.dumps({'executable_path': str(root / 'other')}))
             with self.assertRaises(ValueError):runner.browser_path()
+    def test_browser_receipt_traversal_and_symlink_refused(self):
+        with tempfile.TemporaryDirectory() as d, patch.object(runner, 'ROOT', Path(d)):
+            root = Path(d)
+            browsers = root / '.web-tools/browsers'
+            browsers.mkdir(parents=True)
+            outside = root / 'other'
+            outside.write_text('data')
+            receipt = root / '.web-tools/browser.json'
+            receipt.write_text(json.dumps({'executable_path': str(browsers / '../../other')}))
+            with self.assertRaises(ValueError): runner.browser_path()
+            (browsers / 'alias').symlink_to(outside)
+            receipt.write_text(json.dumps({'executable_path': str(browsers / 'alias')}))
+            with self.assertRaises(ValueError): runner.browser_path()
+            binary = browsers / 'chromium'
+            binary.write_text('data')
+            receipt.write_text(json.dumps({'executable_path': str(binary)}))
+            self.assertEqual(runner.browser_path(), str(binary))
+    def test_unknown_launcher_component_refused(self):
+        with self.assertRaises(ValueError): runner.launch_spec('unknown')
+    def test_scrapling_uses_current_interpreter_after_checkout_rename(self):
+        with tempfile.TemporaryDirectory() as d, patch.object(runner, 'ROOT', Path(d)), patch.object(runner, 'browser_path', return_value='/reviewed/browser'):
+            binary = Path(d)/'.venv/bin'
+            binary.mkdir(parents=True)
+            (binary/'python').write_text('fixture')
+            (binary/'scrapling-mcp').write_text('#!/obsolete/checkout/python\n')
+            args,env=runner.launch_spec('scrapling')
+            self.assertEqual(args[:2],[str(binary/'python'),str(binary/'scrapling-mcp')])
+            self.assertNotIn('API_TOKEN',env)
 
     def test_unsafe_tools_not_enabled(self):
         servers = tomllib.loads(config.render(ROOT))['mcp_servers']

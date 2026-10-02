@@ -241,6 +241,16 @@ class ContextTests(unittest.TestCase):
         p=self.root/'identity/voice.md';p.write_text('My actual voice')
         self.assertEqual(ctx.initialize(self.root),[])
         self.assertEqual(p.read_text(),'My actual voice')
+    def test_new_context_is_private_without_changing_existing_permissions(self):
+        import os,stat
+        if os.name!='posix': self.skipTest('Unix permission policy')
+        ctx.initialize(self.root)
+        self.assertEqual(stat.S_IMODE(self.root.stat().st_mode),0o700)
+        voice=self.root/'identity/voice.md'
+        self.assertEqual(stat.S_IMODE(voice.stat().st_mode),0o600)
+        voice.chmod(0o640)
+        ctx.initialize(self.root)
+        self.assertEqual(stat.S_IMODE(voice.stat().st_mode),0o640)
 
     def test_complete(self):
         ctx.initialize(self.root)
