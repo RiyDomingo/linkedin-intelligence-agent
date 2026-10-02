@@ -1,5 +1,7 @@
 # LinkedIn Intelligence Agent
 
+Repository: [RiyDomingo/linkedin-intelligence-agent](https://github.com/RiyDomingo/linkedin-intelligence-agent).
+
 A Codex-native, lightweight, read-aware toolkit for deciding what deserves your attention, drafting
 LinkedIn content in your voice and learning from real activity and publication history.
 It preserves Jake Schincariol's eleven workflows and adds nine focused supporting skills.
@@ -41,20 +43,25 @@ See [unified orchestration](docs/ORCHESTRATION.md) for the actual capability mat
 health command, examples and limitations. Installed third-party retrieval tools
 have their own dependencies; the core content helpers remain standard-library-only.
 
-Repository: [RiyDomingo/linkedin-intelligence-agent](https://github.com/RiyDomingo/linkedin-intelligence-agent).
-The existing local checkout folder may still be named `linkedin-agent-skill`;
-that does not affect the project name or installation. `.linkedin-agent/` remains
-the compatible data directory.
+The project is **LinkedIn Intelligence Agent**; its repository and default checkout
+name are `linkedin-intelligence-agent`. `.linkedin-agent/` is the private context
+directory, separate from the repository name. Existing context paths remain compatible.
 
 ## Quick start
 
-You need a local Codex installation with skills and file/shell access, and Python
-3.10 or later. Research is optional and uses whatever research tools are available
-in the session. Core writing requires no API key or LinkedIn credentials. Check:
+You need Git, a local Codex installation with skills and file/shell access, and
+Python 3.10 or later. Research is optional and uses whatever research tools are
+available in the session. Core writing requires no API key or LinkedIn credentials.
+
+For a fresh installation, clone this Codex repository:
 
 ```sh
+git clone https://github.com/RiyDomingo/linkedin-intelligence-agent.git
+cd linkedin-intelligence-agent
 python3 --version
 ```
+
+If you already have a checkout, use its existing directory and skip cloning.
 
 Run the following from this cloned repository. Set the installation destination
 to the project where you will write LinkedIn content; the example installs here:
@@ -362,6 +369,17 @@ python3 -m compileall -q skills scripts tests
   fits your voice. Never invent evidence to satisfy a style observation.
 
 ## Updating and removal
+
+To update an existing clone of this repository, first inspect `git status` and
+preserve any local work, then fetch and fast-forward the fork's main branch:
+
+```sh
+git pull --ff-only origin main
+```
+
+This command refuses a divergent merge; resolve local changes deliberately rather
+than resetting them. For upstream development, compare Jake's original project
+separately from the Codex fork.
 
 Keep Jake's original upstream repository separate from this Codex fork. A fresh
 clone normally has only `origin`; inspect `git remote -v` and, if `upstream` is absent,
