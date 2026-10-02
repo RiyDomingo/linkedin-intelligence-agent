@@ -184,3 +184,21 @@ and dated imports; date-only history is interpreted at UTC midnight. Voice and
 claim gates remain semantic skill work rather than tested model classifiers.
 Provider health is an offline receipt view with explicit recent failures, never a
 live reachability assertion. See [the current release audit](docs/V1_RELEASE_AUDIT.md).
+
+## LinkedIn discovery boundary
+
+See [LinkedIn Discovery Mode](docs/LINKEDIN_DISCOVERY.md) for the focused audit.
+Candidate discovery (`LINKEDIN_DISCOVERY`) is separate from actual content reading
+(`LINKEDIN_READ`, imports only). Only the audited Agent Reach index capability may
+serve discovery; current Exa MCP has no index-only switch, so live discovery stays
+UNAVAILABLE. No scraper, reader proxy or managed fallback may substitute.
+
+Discovery results are ephemeral allowlisted search metadata: default 10, maximum
+50, one implemented query per request (budget ceiling 5). They cannot enter the
+ordinary evidence cache or become relationships automatically. LinkedIn page
+fetches, browser visits and scrapes are zero in this workflow. Parsed host guards
+cover LinkedIn subdomains and Jina-wrapped destinations, including redirect stops;
+MCP destination checks occur before server startup. Browser isolation is preserved.
+
+Platform rules and index restrictions can change; these limits provide no legal
+advice or compliance guarantee. The historical v1 audit remains unchanged.

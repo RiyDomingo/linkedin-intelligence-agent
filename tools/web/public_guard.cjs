@@ -11,10 +11,11 @@ module.exports.default = async ({ page }) => {
     try {
       const request = route.request();
       const url = new URL(request.url());
+      const hostname = url.hostname.toLowerCase().replace(/\.+$/, '');
       if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password ||
           (url.port && !['80', '443'].includes(url.port)) ||
           !['GET', 'HEAD'].includes(request.method()) ||
-          /(^|\.)linkedin\.com\.?$/i.test(url.hostname) ||
+          (hostname === 'linkedin.com' || hostname.endsWith('.linkedin.com') || hostname === 'r.jina.ai') ||
           /(^|\.)(localhost|local|internal)\.?$/i.test(url.hostname)) throw new Error('boundary');
       const addresses = await dns.lookup(url.hostname, { all: true });
       execFileSync(python, ['-c', globalIPs], {

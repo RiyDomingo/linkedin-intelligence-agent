@@ -10,11 +10,12 @@ import sys
 
 from evidence import public_url, normalize, deduplicate, is_fresh, load, save, assess, signals
 from evidence import parse_time, timestamp, CLASSES
+from discovery import classify_intent, prepare_request, linkedin_target, rank_candidates, report
 
 OPERATIONS = {'retrieve_url': 'PAGE_FETCH', 'search_web': 'SEARCH', 'research_topic': 'SEARCH',
               'research_social': None, 'browse_interactively': 'INTERACTIVE_BROWSER',
               'crawl_site': 'CRAWL', 'extract_structured': 'STRUCTURED_EXTRACTION',
-              'retrieve_linkedin': 'LINKEDIN_READ', 'local_only': None}
+              'discover_linkedin': 'LINKEDIN_DISCOVERY', 'retrieve_linkedin': 'LINKEDIN_READ', 'local_only': None}
 SOCIAL = {'reddit': 'SOCIAL_REDDIT', 'x': 'SOCIAL_X', 'youtube': 'SOCIAL_YOUTUBE', 'v2ex': 'SOCIAL_V2EX'}
 FAILURES = {'TIMEOUT', 'BLOCKED', 'AUTH_REQUIRED', 'CAPABILITY_MISMATCH', 'NOT_FOUND',
             'PROVIDER_DISABLED', 'RATE_LIMIT', 'PARSE_FAILURE', 'NETWORK_ERROR'}
@@ -22,7 +23,7 @@ PURPOSES = {'FACT_VERIFICATION', 'COMMUNITY_DISCUSSION', 'COMPANY_RESEARCH',
             'CURRENT_EVENT', 'DEEP_INGESTION', 'INTERACTIVE_WORKFLOW', 'LOCAL_WRITING'}
 FIELDS = {'operation', 'purpose', 'url', 'query', 'platform', 'public_input', 'auth_required',
           'interaction_required', 'javascript_required', 'max_age_hours', 'freshness_class',
-          'allow_metered', 'managed_required', 'max_pages', 'selectors', 'steps'}
+          'allow_metered', 'managed_required', 'max_pages', 'selectors', 'steps', 'limit', 'query_budget'}
 
 
 @dataclass
@@ -56,6 +57,13 @@ def request(value):
     if operation not in OPERATIONS or purpose not in PURPOSES:
         raise ValueError('Explicit supported operation and research purpose required')
     output = {**value}
+    # LinkedIn intent is separated before generic search/provider selection.
+    intent = classify_intent(output.get('query'))
+    if operation in ('search_web', 'research_topic') and intent:
+        operation = 'discover_linkedin' if intent == 'LINKEDIN_DISCOVERY' else 'retrieve_linkedin'
+        output['operation'] = operation
+    if operation != 'discover_linkedin' and any(k in output for k in ('limit', 'query_budget')):
+        raise ValueError('Discovery bounds belong only to LinkedIn discovery')
     # Disclosure is explicit: no raw local context field is accepted or copied.
     if output.get('public_input') is not True:
         raise ValueError('Only explicitly minimized public research input is supported')
@@ -103,7 +111,7 @@ def request(value):
         output['interaction_required'] = True
     if (output['javascript_required'] or output['interaction_required']) and operation not in ('retrieve_url', 'browse_interactively'):
         raise ValueError('Combined crawl/search/structured rendering is not supported by this adapter')
-    return output
+    return prepare_request(output) if operation == 'discover_linkedin' else output
 
 
 def capability(req):
@@ -119,7 +127,14 @@ def capability(req):
 def choose(req, providers, attempts=()):
     if req['operation'] == 'local_only':
         return {'state': 'NO_RETRIEVAL', 'provider': None, 'reason': 'Local writing needs no external information'}
-    if req['operation'] == 'retrieve_linkedin' or (req.get('url') and (urlsplit(req['url']).hostname or '').lower().rstrip('.').split('.')[-2:] == ['linkedin', 'com']):
+    if req['operation'] == 'discover_linkedin':
+        suitable = [p for p in providers if p.id == 'agent_reach_discovery' and p.available and p.enabled and 'LINKEDIN_DISCOVERY' in p.capabilities]
+        if attempts or not suitable:
+            return {'state': 'UNAVAILABLE', 'provider': None, 'capability': 'LINKEDIN_DISCOVERY',
+                    'reason': 'No audited index-only Agent Reach search adapter; no page retrieval, scraper or fallback is permitted'}
+        return {'state': 'SELECTED', 'provider': 'agent_reach_discovery', 'capability': 'LINKEDIN_DISCOVERY',
+                'reason': 'Agent Reach external-index discovery only; stop after metadata, never escalate'}
+    if req['operation'] == 'retrieve_linkedin' or (req.get('url') and linkedin_target(req['url'])):
         return {'state': 'LINKEDIN_READER', 'provider': None, 'reason': 'Use li-read; web health grants no account access'}
     cap = capability(req)
     tried = {a['provider'] for a in attempts}
@@ -166,6 +181,8 @@ def execute(value, providers, root, now=None):
     req = request(value)
     now = now or datetime.now(timezone.utc)
     plan = choose(req, providers)
+    if req['operation'] == 'discover_linkedin':
+        return execute_discovery(req, providers, plan, now)
     if plan['state'] in ('NO_RETRIEVAL', 'LINKEDIN_READER'):
         return {'state': plan['state'], 'evidence': [], 'attempts': [], 'decision': plan}
     if req.get('url') and not req.get('steps') and not req.get('selectors') and not req['javascript_required'] and not req['interaction_required'] and req['operation'] == 'retrieve_url':
@@ -185,6 +202,8 @@ def execute(value, providers, root, now=None):
             packets = selected.retrieve(req)
             if not isinstance(packets, list) or not packets:
                 raise RetrievalFailure('PARSE_FAILURE')
+            if any(p.get('url') and linkedin_target(p['url']) for p in packets):
+                raise RetrievalFailure('AUTH_REQUIRED')
             received = max(now, datetime.now(timezone.utc))
             records = [normalize({**p, 'freshness_class': req['freshness_class']}, selected.id, received, 'SOCIAL_COMMUNITY' if req['operation'] == 'research_social' else 'PUBLIC_WEB') for p in packets]
             if any((req['max_age_hours'] == 0 and parse_time(r['retrieved_at']) < now) or
@@ -201,6 +220,30 @@ def execute(value, providers, root, now=None):
             attempts.append({'provider': selected.id, 'failure': 'PARSE_FAILURE', 'decision': plan})
     return {'state': 'UNAVAILABLE', 'evidence': [], 'attempts': attempts,
             'decision': choose(req, providers, attempts)}
+
+
+def execute_discovery(req, providers, plan, now):
+    # A separate path: no evidence cache, relationship store, read adapter or retry loop.
+    result = report([], req['limit'])
+    if plan['state'] != 'SELECTED':
+        return {**result, 'state': 'UNAVAILABLE', 'evidence': [], 'attempts': [], 'decision': plan}
+    provider = next(p for p in providers if p.id == plan['provider'])
+    try:
+        if provider.retrieve is None:
+            raise RetrievalFailure('PROVIDER_DISABLED')
+        result = report([], req['limit'], queries_used=1)
+        rows = provider.retrieve(req)
+        candidates = rank_candidates(rows, req['query'], req['limit'], now, 'agent_reach/external-index')
+        result = report(candidates, req['limit'], queries_used=1)
+        attempt = {'provider': provider.id, 'failure': None, 'decision': plan}
+        return {**result, 'state': 'SUCCESS', 'evidence': [], 'attempts': [attempt], 'decision': plan}
+    except RetrievalFailure as exc:
+        failure = exc.reason
+    except Exception:
+        failure = 'PARSE_FAILURE'
+    return {**result, 'state': 'UNAVAILABLE', 'evidence': [],
+            'attempts': [{'provider': provider.id, 'failure': failure, 'decision': plan}],
+            'decision': choose(req, providers, [{'provider': provider.id, 'failure': failure}])}
 
 
 def health(providers):

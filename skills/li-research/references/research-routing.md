@@ -4,6 +4,20 @@ High-level skills state WHAT is needed. This layer owns HOW it is retrieved. The
 linked LinkedIn reader owns account/import capability status; web tools never grant
 profile/feed/inbox access. Composition is stage application, not recursive skill calls.
 
+## LinkedIn discovery before retrieval
+
+Apply [the discovery contract](linkedin-discovery.md) for explicit LinkedIn candidate
+search. `discover_linkedin` requires only a minimized public query. It selects only
+`agent_reach_discovery` with `LINKEDIN_DISCOVERY`; no other provider or fallback can
+substitute. Generic search queries clearly asking to find LinkedIn candidates are
+classified before web retrieval. Profile-analysis requests route to LINKEDIN_READ.
+Ambiguous intent is interpreted by Codex rather than treated as permission to fetch.
+
+Discovery has a separate ephemeral result model. It never enters the evidence cache,
+read store or curated relationships. Live execution currently reports UNAVAILABLE:
+the inspected Exa MCP tool has no index-only/no-livecrawl guarantee. Do not fill that
+gap by invoking Agent Reach's LinkedIn career commands or Jina fallback.
+
 ## Requests
 
 A minimized public request identifies operation, purpose and freshness needs:
@@ -13,7 +27,7 @@ A minimized public request identifies operation, purpose and freshness needs:
 ```
 
 Operations: retrieve_url, search_web, research_topic, research_social,
-browse_interactively, crawl_site, extract_structured, retrieve_linkedin, local_only.
+browse_interactively, crawl_site, extract_structured, discover_linkedin, retrieve_linkedin, local_only.
 Purposes: FACT_VERIFICATION, COMMUNITY_DISCUSSION, COMPANY_RESEARCH, CURRENT_EVENT,
 DEEP_INGESTION, INTERACTIVE_WORKFLOW, LOCAL_WRITING. For specialist discussion provide
 platform reddit/x/youtube/v2ex and a minimized query. Request each platform only when
@@ -47,7 +61,9 @@ pretends an installed command has authorized account access.
   The local adapter has no free search engine. Explicit justified managed search can
   use an enabled managed provider; otherwise report missing access/use supplied URLs.
 - BLOCKED_RETRIEVAL → optional enabled managed fallback (currently Bright Data).
-- LINKEDIN_READ → li-read, never a web-provider shortcut.
+- LINKEDIN_DISCOVERY → audited Agent Reach external-index metadata only, then STOP.
+  Default 10, hard cap 50 results; one implemented query, budget ceiling 5; no batching.
+- LINKEDIN_READ → li-read imports/supplied content, never a web-provider shortcut.
 - Local-only → no provider call.
 
 Failures are explicit: TIMEOUT, BLOCKED, AUTH_REQUIRED, CAPABILITY_MISMATCH, NOT_FOUND,

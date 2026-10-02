@@ -19,11 +19,12 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'skills/li-research/scripts'))
 from orchestrator import Provider, RetrievalFailure, request, choose, execute, health, FAILURES
 from evidence import public_url, timestamp, parse_time, signals, load
+from discovery import linkedin_target, canonical_host
 
 
 def network_url(url):
     url = public_url(url)
-    if (urlsplit(url).hostname or '').lower().rstrip('.').split('.')[-2:] == ['linkedin', 'com']:
+    if linkedin_target(url) or canonical_host(url) == 'r.jina.ai':
         raise RetrievalFailure('AUTH_REQUIRED')
     try:
         addresses = socket.getaddrinfo(urlsplit(url).hostname, None)
@@ -70,6 +71,13 @@ def packet(response, selectors=None):
 
 
 async def mcp_call(component, calls):
+    if component not in ('scrapling', 'playwright', 'brightdata'):
+        raise RetrievalFailure('CAPABILITY_MISMATCH')
+    # Validate before server initialization (including paid-provider startup).
+    for name, args in calls:
+        for candidate in [args.get('url'), *args.get('urls', [])]:
+            if candidate:
+                network_url(candidate)
     from mcp import ClientSession, StdioServerParameters
     from mcp.client.stdio import stdio_client
     env = dict(os.environ)
@@ -257,7 +265,11 @@ def providers(root=".linkedin-agent"):
         browser_binary = False
     playwright = (ROOT / 'tools/web/node_modules/@playwright/mcp/cli.js').is_file() and browser_binary and bool(shutil.which('node'))
     bright = (ROOT / 'tools/web/node_modules/@brightdata/mcp/server.js').is_file()
-    return [Provider('scrapling', frozenset({'PAGE_FETCH', 'STRUCTURED_EXTRACTION'} | ({'CRAWL'} if research_settings.get('crawler_enabled', False) else set()) | ({'JAVASCRIPT'} if browser_binary else set())),
+    # Installed Exa web_search_exa exposes content but no index-only/no-livecrawl
+    # switch (audited 2026-10-02). Never enable it from command presence alone.
+    discovery = Provider('agent_reach_discovery', frozenset({'LINKEDIN_DISCOVERY'}),
+                         False, False, 'FREE_EXTERNAL', 0)
+    return [discovery, Provider('scrapling', frozenset({'PAGE_FETCH', 'STRUCTURED_EXTRACTION'} | ({'CRAWL'} if research_settings.get('crawler_enabled', False) else set()) | ({'JAVASCRIPT'} if browser_binary else set())),
                      scrapling, 'scrapling_local' in servers and servers['scrapling_local'].get('enabled', True), 'LOCAL', 0, validated=validated('scrapling'), retrieve=scrape, last_failure=last_failure('scrapling')),
             Provider('playwright', frozenset({'PAGE_FETCH', 'INTERACTIVE_BROWSER'}), playwright,
                      'playwright_local' in servers and servers['playwright_local'].get('enabled', True), 'LOCAL', 2, validated=validated('playwright'), retrieve=browser, last_failure=last_failure('playwright')),
@@ -288,6 +300,14 @@ def record_validation(result):
     atomic_save(ROOT, '.web-tools/health.json', rows)
 
 
+def linkedin_capabilities(available):
+    discovery = next((p for p in available if p.id == 'agent_reach_discovery'), None)
+    return {'discovery': {'state': 'AVAILABLE' if discovery and discovery.available and discovery.enabled else 'UNAVAILABLE',
+                          'reason': 'Current Exa MCP search has no audited index-only guarantee; direct reads remain blocked',
+                          'default_results': 10, 'max_results': 50, 'max_page_fetches': 0},
+            **{name: 'IMPORT ONLY' for name in ('profile_read', 'posts_read', 'feed_read', 'network_read', 'analytics', 'inbox')}}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', default='.linkedin-agent')
@@ -299,6 +319,7 @@ def main():
         if args.command == 'health':
             from read_layer import status
             result = {'research_providers': health(available), 'linkedin_reader': status(args.root),
+                      'linkedin_capabilities': linkedin_capabilities(available),
                       'specialist_gaps': {'SOCIAL_REDDIT': 'AUTH_REQUIRED / no approved adapter',
                                           'SOCIAL_X': 'AUTH_REQUIRED / no approved adapter',
                                           'SOCIAL_YOUTUBE': 'Installed yt-dlp not validated by this adapter'}}

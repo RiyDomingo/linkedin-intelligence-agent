@@ -116,7 +116,7 @@ class WebToolingTests(unittest.TestCase):
             (binary/'python').write_text('fixture')
             (binary/'scrapling-mcp').write_text('#!/obsolete/checkout/python\n')
             args,env=runner.launch_spec('scrapling')
-            self.assertEqual(args[:2],[str(binary/'python'),str(binary/'scrapling-mcp')])
+            self.assertEqual(args[:2],[str(binary/'python'),str(Path(d)/'tools/web/guarded_scrapling.py')])
             self.assertNotIn('API_TOKEN',env)
 
     def test_unsafe_tools_not_enabled(self):

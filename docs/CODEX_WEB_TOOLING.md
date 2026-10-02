@@ -233,3 +233,21 @@ guard and blocks service workers; this applies to smoke tests and direct Codex M
 launches as well as the bridge. Browser receipts reject traversal and symlinks.
 See [the current v1 audit](V1_RELEASE_AUDIT.md) for current check results; the
 installation observations above are historical.
+
+## Agent Reach LinkedIn discovery audit
+
+See [LinkedIn Discovery Mode](LINKEDIN_DISCOVERY.md) for the focused audit.
+Candidate discovery (`LINKEDIN_DISCOVERY`) is separate from actual content reading
+(`LINKEDIN_READ`, imports only). Only the audited Agent Reach index capability may
+serve discovery; current Exa MCP has no index-only switch, so live discovery stays
+UNAVAILABLE. No scraper, reader proxy or managed fallback may substitute.
+
+Discovery results are ephemeral allowlisted search metadata: default 10, maximum
+50, one implemented query per request (budget ceiling 5). They cannot enter the
+ordinary evidence cache or become relationships automatically. LinkedIn page
+fetches, browser visits and scrapes are zero in this workflow. Parsed host guards
+cover LinkedIn subdomains and Jina-wrapped destinations, including redirect stops;
+MCP destination checks occur before server startup. Browser isolation is preserved.
+
+Platform rules and index restrictions can change; these limits provide no legal
+advice or compliance guarantee. The historical v1 audit remains unchanged.

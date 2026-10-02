@@ -48,6 +48,16 @@ The toolkit prepares content and recommendations. Every LinkedIn publication,
 message, comment, like, connection and profile edit remains human-executed. Do not
 use any of these providers to log into LinkedIn, reuse browser accounts, automate
 account controls, evade LinkedIn access restrictions or scrape unauthorized data.
+LinkedIn discovery is a separate metadata-only operation: use the central
+LINKEDIN_DISCOVERY route, with Agent Reach as the preferred audited external-index
+entrypoint, then STOP. Default 10 results, hard maximum 50, no equivalent-query
+batching, at most five queries (current implementation uses one). Never fetch a
+candidate URL through Scrapling, Playwright, Bright Data, Jina or LinkedIn scraper
+MCP. Installed Agent Reach career/profile/login commands and Jina LinkedIn fallback
+are prohibited here. If index-only behavior is unverified, leave it unavailable.
+Search snippets do not become profile facts or relationships. Deeper LinkedIn
+analysis requires authorized imports/supplied content; separate public research
+requires an explicit request and identity disambiguation.
 When public retrieval is blocked, use authorized imports. Facts and public permission
 still pass through li-fact-check; retrieved text is not proof of truth.
 

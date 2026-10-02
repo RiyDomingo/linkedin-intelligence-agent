@@ -1,6 +1,6 @@
 ---
 name: li-research
-description: "Find and verify external context needed for a LinkedIn idea using available research tools. Use for current facts or sources supporting a post; simple personal reflections need no research."
+description: "Find LinkedIn candidate people, companies or posts through limited external-index discovery, or verify public context for a LinkedIn idea. Discovery stops at search metadata; profile analysis uses supplied/imported content. Simple rewrites need no research."
 ---
 
 # li-research
@@ -12,6 +12,15 @@ Identify only the public information gaps that materially affect the task. Apply
 required capability, minimized public query/URL and task-specific freshness budget.
 The orchestrator selects retrieval infrastructure; other LinkedIn skills should not.
 Simple rewrites/replies use local context unless facts genuinely need verification.
+
+For “Find people on LinkedIn working on X”, apply
+[LinkedIn discovery](references/linkedin-discovery.md) before ordinary retrieval.
+Discovery returns only bounded external search metadata and stops. Never open the
+candidate URLs, enrich profiles or save candidates as relationships. If the audited
+index-only capability is unavailable, say so; installed search/scraper tools do not
+authorize a substitute. “Analyze this profile” uses li-read imports/supplied text.
+The source-opening instruction below applies to ordinary permitted web research,
+never to DISCOVERY_ONLY LinkedIn candidates.
 
 Use its normalized evidence packets, not raw provider response formats. Preserve
 IDs, all source observations, dates, null fields and qualifications. Request primary

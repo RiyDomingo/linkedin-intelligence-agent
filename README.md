@@ -152,6 +152,31 @@ The router is designed to use the simplest and lowest-cost suitable method rathe
 
 ---
 
+### LinkedIn Discovery Mode
+
+Ask:
+
+> Find up to 30 LinkedIn profiles relevant to sports biomechanics.
+
+Discovery is a separate, limited search workflow: Agent Reach is the preferred
+entrypoint for **external search/index metadata**, with 10 candidates by default
+and a hard maximum of 50 per request. Results remain `DISCOVERY_ONLY`; snippets are
+not verified profile facts. There is no automatic profile opening, scraping,
+enrichment, relationship recording or provider escalation. To analyze a profile,
+provide an authorized snapshot or paste the relevant information.
+
+**Current availability: UNAVAILABLE for live discovery.** The inspected Agent Reach
+Exa MCP search exposes content but no option guaranteeing index-only retrieval.
+That path remains disabled instead of risking automatic LinkedIn page retrieval.
+Routing, limits and metadata handling are implemented and tested with offline
+fixtures. See [LinkedIn Discovery Mode](docs/LINKEDIN_DISCOVERY.md) for the capability
+matrix and audit. Core writing/imports and supported ordinary research still work.
+
+The result cap is a product boundary, not permission to scrape or a legal compliance
+guarantee. Platform and index usage rules may change.
+
+---
+
 ### Fact-check claims
 
 The agent can distinguish between:
@@ -497,6 +522,7 @@ For the shortest setup path:
 - [Research & Web Tooling](docs/CODEX_WEB_TOOLING.md)
 - [Orchestration](docs/ORCHESTRATION.md)
 - [V1 Release Audit](docs/V1_RELEASE_AUDIT.md)
+- [LinkedIn Discovery Mode](docs/LINKEDIN_DISCOVERY.md)
 
 ---
 

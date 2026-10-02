@@ -441,6 +441,18 @@ Check provider status:
 
 The verification commands are short test requests; they do not update the bridge's health records. A provider can pass these checks and still show `AVAILABLE_UNVALIDATED`. Ask Codex for a small permitted public research task to exercise the bridge; health then reflects its recorded outcome. Not every provider needs enabling.
 
+### LinkedIn discovery is different from reading a profile
+
+You can ask “Find people on LinkedIn working on sports biomechanics.” The separate
+discovery workflow is designed for limited external search metadata, with up to 10
+results by default and never more than 50. It does not open or scrape those profiles.
+To analyze profile content, provide an authorized snapshot or paste the information.
+
+**The currently audited live search path is unavailable**, because its search tool
+cannot guarantee index-only retrieval. The agent should explain that gap rather
+than use a scraper. This does not prevent basic writing or imported-data review.
+Agent Reach is still optional. See [the discovery status](LINKEDIN_DISCOVERY.md).
+
 ### Leave Agent Reach and Bright Data optional
 
 **Agent Reach:** no install or account-authentication step is required here. Its presence on the audited machine does not mean it is on yours. Public V2EX requires deliberate source opt-in; leave it off unless needed. Installed Reddit/X/YouTube utilities are not evidence of working bridge capabilities.

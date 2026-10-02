@@ -5,7 +5,7 @@ args = [__LAUNCHER__, "scrapling"]
 startup_timeout_sec = 30
 tool_timeout_sec = 120
 required = false
-# GET-only usage policy is in AGENTS.md; make_request itself also supports writes.
+# The pinned host bootstrap enforces GET-only HTTP, destinations and no auto-redirects.
 # Omit request-session and stealth tools from the default catalog.
 enabled_tools = ["make_request", "bulk_get", "fetch", "bulk_fetch", "open_session", "session_fetch", "close_session", "list_sessions", "screenshot"]
 

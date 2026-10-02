@@ -12,8 +12,11 @@ tools and run `scripts/read_layer.py --root <project>/.linkedin-agent status`.
 `tools` detects command presence only; pass actually exposed session tool names with
 `--available-tool` when useful. Never equate installed tools with LinkedIn access.
 
-Prefer a supported integration actually present, then user exports, ordinary permitted
-public retrieval, supplied material and an explicitly enabled read connector. This
+LinkedIn candidate discovery is separate: apply [li-research](../li-research/SKILL.md)
+for external-index metadata, then stop. Discovery availability never grants profile,
+feed, network or inbox access. For actual LinkedIn content, use authorized imports,
+local snapshots or supplied text; do not fetch LinkedIn URLs through web providers,
+Jina, an authenticated scraper or browser automation. This
 package implements local import/snapshot adapters, not a remote account client. If
 legitimate session read tools expose requested data, use only their read operations,
 normalize the actual result to the envelope and import it. Otherwise use imports or

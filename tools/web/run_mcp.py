@@ -41,7 +41,7 @@ def launch_spec(component):
             raise ValueError('Optional Scrapling entrypoint missing')
         # Invoke with the current interpreter; generated shebangs can retain
         # an obsolete checkout path after a directory rename.
-        args = [str(executable), str(entrypoint), '--executable-path', browser_path()]
+        args = [str(executable), str(ROOT / 'tools/web/guarded_scrapling.py'), '--executable-path', browser_path()]
     else:
         executable = shutil.which('node')
         if not executable:
@@ -58,9 +58,10 @@ def launch_spec(component):
             cli = ROOT / 'tools/web/node_modules/@brightdata/mcp/server.js'
             # No social or remote-browser groups: the managed fallback is retrieval only.
             env.pop('GROUPS', None)
-            env.pop('TOOLS', None)
+            env['TOOLS'] = 'search_engine,scrape_as_markdown'
+            env['LINKEDIN_AGENT_GUARD_COMPONENT'] = 'brightdata'
             env['RATE_LIMIT'] = '20/1h'
-            args = [executable, str(cli)]
+            args = [executable, '--import', str(ROOT / 'tools/web/managed_guard.mjs'), str(cli)]
         if not cli.is_file():
             raise ValueError('MCP dependencies missing; run npm ci --prefix tools/web --ignore-scripts')
     if not executable or not Path(executable).is_file():

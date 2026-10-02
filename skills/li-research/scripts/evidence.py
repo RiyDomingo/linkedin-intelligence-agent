@@ -54,6 +54,8 @@ def optional_text(value):
 def normalize(packet, provider, now=None, source_type='PUBLIC_WEB'):
     if not isinstance(packet, dict) or not isinstance(provider, str) or not provider:
         raise ValueError('Evidence requires a packet and trusted provider identifier')
+    if packet.get('state') == 'DISCOVERY_ONLY' or packet.get('source_type') == 'EXTERNAL_SEARCH_RESULT':
+        raise ValueError('Discovery snippets are not retrieved profile evidence; do not promote them')
     if source_type not in SOURCE_TYPES:
         raise ValueError('Retrieval cannot attest WEB_VERIFIED or INFERRED evidence')
     now = now or datetime.now(timezone.utc)
