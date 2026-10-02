@@ -150,9 +150,13 @@ provided; impressions alone do not define success.
 
 ## Security boundaries
 
-Python is local, standard-library-only: no network, credentials, subprocess or
-executable data. Session tools are a separate optional research boundary and receive
-minimal public queries. There are no LinkedIn write methods; the dedicated optional account gateway
+Core context, history and writing-quality helpers use the standard library and
+perform no network retrieval. Optional PDF/DOCX memory ingestion invokes the
+installed MarkItDown executable with a bounded argument list and timeout. The
+isolated account gateway launches a pinned third-party connector that networks
+and uses its dedicated authenticated browser. Optional research tools form a
+separate boundary and receive minimal public queries. There are no LinkedIn write
+methods; the dedicated optional account gateway
 provides bounded manually authenticated reads.
 Human approval never triggers an account action.
 

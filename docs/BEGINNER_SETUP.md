@@ -2,7 +2,7 @@
 
 ## What you are installing
 
-LinkedIn Intelligence Agent is a set of Codex Skills and local tools that help you review imported LinkedIn information, find ideas, plan content, draft posts and replies, and learn from your real publication history.
+LinkedIn Intelligence Agent is a set of Codex Skills and local tools that help you review account-observed or imported LinkedIn information, build reusable professional memory, find ideas, plan content, draft posts and replies, and learn from your real publication history.
 
 **Account connection is optional and preferred for onboarding when configured.**
 Follow [Connect LinkedIn](ACCOUNT_CONNECTOR.md): install the restricted connector,
@@ -138,7 +138,9 @@ Codex can choose a Skill from a natural request. You do not normally need to rem
 
 **Success:** a readable draft based only on supplied text, no invented results and no attempt to open LinkedIn. It may ask for writing samples. No browser tool or paid service is needed.
 
-You now have the basic installation. Continue below to personalize it and add real information. The [one-page quickstart](QUICKSTART.md) is available for later reference.
+You now have the basic installation. The toolkit runs in your Codex chat; there is
+no separate application or background service to start. Continue below to connect
+your account and personalize it. The [one-page quickstart](QUICKSTART.md) is available for later reference.
 
 ## First Run
 
@@ -186,7 +188,7 @@ Check its proposed `identity/voice.md`. Repeat the rewrite request with another 
 
 ## Give the Agent LinkedIn Information
 
-### Step 7 — Start with pasted content
+### Step 7 — Optional imports for additional or unavailable account data
 
 **Account access** is supported by the separate restricted connector for your own
 profile/posts/feed. Use [that onboarding path](ACCOUNT_CONNECTOR.md) before manual

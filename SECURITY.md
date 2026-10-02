@@ -37,9 +37,13 @@ no passwords, cookies, session tokens, LinkedIn credentials or API keys.
 
 ## What was inspected
 
-No runtime networking libraries, HTTP calls, telemetry, subprocess use, eval/exec,
-shell construction, unsafe deserialization, credential ingestion or executable data
-were found in the shipped scripts. JSON is parsed as data; CSV and JSONL are
+The core writing/context/history helpers contain no networking or telemetry.
+Optional document ingestion invokes MarkItDown with fixed argument boundaries and
+a timeout. Optional connector and research setup/gateway scripts launch reviewed
+external dependencies and can access the network; their boundaries are described
+separately below. No eval/exec, shell interpolation of input, unsafe deserialization,
+credential ingestion into professional memory or execution of source data was found.
+JSON is parsed as data; CSV and JSONL are
 schema-checked. Python CLI arguments are handled by argparse, not interpolated
 into shell commands. The installer copies reviewed files without executing them.
 The humanizer only writes when an explicit new output is supplied. Init never

@@ -157,4 +157,7 @@ trust and OCR quality, bounded evidence/output sizes, agent semantic normalizati
 alignment, first-party ownership association not verified automatically, and lack of
 multi-user/browser switching. Source labels are attestations, not cryptographic proof.
 Private context entering Codex may reach its configured model service. No provider-wide
-DLP interception is claimed. No account credentials enter memory. No commit or push.
+DLP interception is claimed. No account credentials enter memory. No commit or push
+occurred during the implementation review. The implementation was subsequently published with explicit
+user authorization in
+[commit a207609](https://github.com/RiyDomingo/linkedin-intelligence-agent/commit/a207609f4efbf0d187e543187f71ca40f6941c54).

@@ -16,6 +16,24 @@ You stay in control.
 
 ---
 
+## Start in the Codex desktop app
+
+Open this repository as a local project in Codex. Install the 20 Skills and create
+private context using the [Quickstart](docs/QUICKSTART.md), then ask:
+
+> Set up the restricted LinkedIn account connector. Read my profile and own posts,
+> build my professional context, and tell me what deserves my attention.
+
+You sign in yourself in the connector's dedicated browser if needed. Signing in to
+LinkedIn in another browser tab does not connect this gateway. After onboarding,
+Codex reuses saved professional context for ordinary writing tasks. You do not need
+to paste your profile or posts on the connected path.
+
+There is no standalone app or background service to launch: the Skills run in your
+Codex chat, and the optional account gateway supplies bounded reads. Comments,
+inbox, connections and analytics require authorized additional data; the connector
+currently reads only your own profile, own posts and a feed sample.
+
 ## Reusable professional context
 
 After connecting LinkedIn, the agent builds private local professional memory.
@@ -58,6 +76,10 @@ The agent can help identify:
 - useful industry signals
 - topics worth posting about
 - things you can safely ignore
+
+Comment/reply recommendations need supplied or imported comments; inbox and relationship
+recommendations need their corresponding authorized data. A feed sample does not
+provide complete account coverage.
 
 The goal is not to manufacture activity.
 
@@ -382,7 +404,9 @@ Then **you** decide what happens next.
 
 ## Privacy first
 
-The core toolkit is designed around local context and imported data.
+The toolkit stores normalized account observations, optional imports and professional
+memory locally. The dedicated connector keeps its authenticated browser profile
+outside the repository.
 
 Local information may include:
 
@@ -545,6 +569,8 @@ For the shortest setup path:
 - [LinkedIn Intelligence Review](docs/LINKEDIN_INTELLIGENCE_REVIEW.md)
 - [Connect LinkedIn](docs/ACCOUNT_CONNECTOR.md)
 - [Account Connector Review](docs/ACCOUNT_CONNECTOR_REVIEW.md)
+- [Professional Memory](docs/PROFESSIONAL_MEMORY.md)
+- [Professional Memory Review](docs/PROFESSIONAL_MEMORY_REVIEW.md)
 
 ---
 
@@ -558,8 +584,8 @@ See [the memory review](docs/PROFESSIONAL_MEMORY_REVIEW.md). Live profile, own-p
 reads, dedicated-session reuse and a private brief/draft were exercised. A new
 manual login and real authentication challenge were not exercised; see the
 [account acceptance review](docs/ACCOUNT_CONNECTOR_REVIEW.md).
-See the [current review](docs/LINKEDIN_INTELLIGENCE_REVIEW.md) for findings,
-validation and remaining limitations. The [v1 release audit](docs/V1_RELEASE_AUDIT.md)
+The [earlier intelligence review](docs/LINKEDIN_INTELLIGENCE_REVIEW.md) records
+validation before the account connector and memory milestones. The [v1 release audit](docs/V1_RELEASE_AUDIT.md)
 records the earlier 228-test baseline and optional web-tooling checks.
 
 The optional restricted account connector now supports live account observations;

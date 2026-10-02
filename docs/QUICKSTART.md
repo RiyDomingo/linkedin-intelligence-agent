@@ -2,7 +2,9 @@
 
 For explanations and troubleshooting, use the [Beginner Setup Guide](BEGINNER_SETUP.md).
 This is the tested **macOS core path**: local Codex, Git and Python 3.10+.
-No Node, npm, research provider or LinkedIn credentials are required.
+Core writing needs no Node, npm, research provider or LinkedIn login. For account
+onboarding, also follow Step 5: the isolated connector requires uv and Python 3.12
+and you sign in manually in its dedicated browser. See [connector setup](ACCOUNT_CONNECTOR.md).
 
 ## 1. Check prerequisites
 
@@ -68,13 +70,16 @@ newly installed Skills are not visible. Ask:
 > Rewrite this LinkedIn post in a plain tone without adding facts or doing research:
 > “I reviewed our checklist today. One step was unclear. I rewrote it.”
 
-Expected: a usable draft, no LinkedIn action. Then ask:
+Expected: a usable draft, no LinkedIn action.
 
-> Set up my LinkedIn Intelligence Agent. Help me add my real voice, public bio and audience.
+For account-based onboarding, continue to Step 5. Codex can use your own observed
+posts to propose voice traits, with uncertainty clearly labelled. You do not need
+to paste your profile or posts when that connection succeeds.
 
-Supply three real writing samples. Use the full guide to
-[add authorized LinkedIn information](BEGINNER_SETUP.md#give-the-agent-linkedin-information)
-or try its separate fictional practice import.
+If you prefer the local-only path, ask Codex to help add your real voice, public bio
+and audience. Supply representative writing samples,
+[authorized LinkedIn information](BEGINNER_SETUP.md#give-the-agent-linkedin-information),
+or try the full guide's separate fictional practice import.
 
 ## 5. Connect LinkedIn (optional account onboarding)
 
@@ -86,6 +91,8 @@ python3 tools/linkedin/manage.py --root .linkedin-agent enable
 Restart Codex if needed, then ask: "Connect LinkedIn and build my professional
 context from my profile and own posts." Sign in yourself in the dedicated browser
 if requested. The connector can reuse an existing saved login. No password in chat.
+Sign-in in another browser tab does not connect this gateway. There is no separate
+application to launch: continue working in this project's Codex chat.
 See [requirements, actual validation and limitations](ACCOUNT_CONNECTOR.md).
 
 The account connector reads only bounded own profile/posts/feed. It is third-party

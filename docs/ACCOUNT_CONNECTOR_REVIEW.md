@@ -137,7 +137,9 @@ Live evidence is reported above separately from synthetic tests. Local humanizer
 made no edits to the draft; quality panel found zero generic-language hits, formatting
 artefacts or repeated structural patterns. Those are style heuristics, not factual
 verification or proof of authorship. LICENSE and upstream MIT attribution remain intact.
-No commit or push was performed.
+No commit or push occurred during this acceptance run. The implementation was
+subsequently published with explicit user authorization in
+[commit a207609](https://github.com/RiyDomingo/linkedin-intelligence-agent/commit/a207609f4efbf0d187e543187f71ca40f6941c54).
 
 The project-local registration was written and programmatically validated. Restart
 Codex/reopen this trusted project to load the new MCP registration if the five tools
