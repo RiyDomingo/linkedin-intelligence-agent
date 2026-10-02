@@ -1,5 +1,15 @@
 # LinkedIn Intelligence Agent architecture
 
+## Account-reading scope update
+
+The [restricted account connector](docs/ACCOUNT_CONNECTOR.md) is an explicit bounded own-profile/posts/feed
+read exception to the earlier import-only scope. It calls pinned mcp-server-linkedin
+directly through a project gateway; Agent Reach remains in research/discovery.
+Generic providers still cannot fetch/login to LinkedIn, external discovery stays
+separate, inbox is excluded and all write actions remain disabled. Earlier audits
+and zero-access observations describe their original validation, not this new path.
+
+
 Twenty focused skill entrypoints use progressive loading. Name/description route
 the request; SKILL.md loads relevant references only. Installed skills are siblings;
 shared resources stay inside the pack so installed copies need no repository-root
@@ -96,7 +106,8 @@ from confirmed publication and presents experiments, not causal success claims.
 ## Read layer
 
 `ReadProvider.read(capability)` is a read-only protocol. The included FileProvider
-reads configured imports; no remote account client is bundled. Source-type labels
+reads configured imports; the separate optional account gateway supplies actual
+live receipts to the same normalized layer. Source-type labels
 represent receipts, not account access. Routing prioritizes supported integration
 receipts, exports, public retrieval, supplied material, then optional connectors;
 errors, partial and stale coverage trigger fallback. Capability status distinguishes
@@ -141,7 +152,8 @@ provided; impressions alone do not define success.
 
 Python is local, standard-library-only: no network, credentials, subprocess or
 executable data. Session tools are a separate optional research boundary and receive
-minimal public queries. There are no LinkedIn write methods or browser account flows.
+minimal public queries. There are no LinkedIn write methods; the dedicated optional account gateway
+provides bounded manually authenticated reads.
 Human approval never triggers an account action.
 
 Data paths reject traversal/interior symlinks. New cache files/directories have private
@@ -229,3 +241,37 @@ flowchart TD
   INT --> DRAFT[Recommendation / draft]
   DRAFT --> USER
 ```
+
+## Account data flow
+
+Codex → five-tool restricted gateway → pinned upstream stdio server → dedicated
+authenticated browser → bounded section evidence in the active session → Codex
+semantic normalization → existing read envelope validation → private observations
+and dated OBSERVED/INFERRED summaries → brief/ideas/draft skills → human execution.
+
+Tools/linkedin is an isolated optional environment. Core account_context.py remains
+stdlib-only. No raw upstream catalogue/resources/prompts are forwarded. Onboarding
+uses grouped section reads (5/3/2 scroll bounds, six calls); routine tasks use two
+scrolls and four calls. Kill switch, TTL planning and independent capability/error
+status separate access from cached context. No local observations amend confirmed
+publication history or curated identity/claims automatically.
+
+## Professional memory supplement
+
+The shared li-context professional_memory.py layer adds an opaque local user ID,
+versioned optional resume/bio/website/link sources, provenance, source precedence,
+visible conflicts and durable corrections. The compatible layout remains one user
+per project; multi-user browser switching is not implemented. Account authentication
+and memory are separate. Normalized account retention feeds this API without new
+network reads; confirmed history can supply derived topics without promoting account
+observations to confirmed publication. Curated files remain authoritative.
+
+New private memory files/directories use 0600/0700 and are ignored. Source documents
+are referenced/hash-indexed rather than copied. Public retrieval stays in the existing
+router. Parser/runtime trust and semantic extraction still require review; precedence
+is not fact verification, public permission or proof of expertise. Removal deactivates
+sources but retains private audit evidence. Explicit reset/export controls are scoped,
+exclude authentication and do not remove external source files.
+
+See [the memory guide](docs/PROFESSIONAL_MEMORY.md) and
+[review](docs/PROFESSIONAL_MEMORY_REVIEW.md) for actual validation and limitations.

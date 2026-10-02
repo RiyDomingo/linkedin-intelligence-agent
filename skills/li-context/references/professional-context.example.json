@@ -1,0 +1,32 @@
+{
+  "example_only": true,
+  "instructions": "Synthetic normalized extraction list; IDs are returned at runtime. No personal defaults.",
+  "items": [
+    {
+      "field": "current_roles",
+      "key": "primary",
+      "value": "Research Engineer at Sample Robotics Ltd.",
+      "kind": "FACT"
+    },
+    {
+      "field": "positioning",
+      "key": "primary",
+      "value": "Building dependable robotics products",
+      "kind": "POSITIONING"
+    },
+    {
+      "field": "interests",
+      "key": "robotics",
+      "value": "Robotics",
+      "kind": "INTEREST",
+      "inferred": true
+    },
+    {
+      "field": "expertise",
+      "key": "robotics",
+      "value": "Robotics",
+      "kind": "EXPERTISE",
+      "level": "works_on"
+    }
+  ]
+}

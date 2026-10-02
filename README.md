@@ -6,7 +6,9 @@
 
 LinkedIn Intelligence Agent is a Codex-native professional intelligence toolkit that helps you turn your LinkedIn data, writing history, network context and external research into clearer decisions, better content and more meaningful engagement.
 
-It can analyze your imported LinkedIn activity, identify worthwhile opportunities, research topics, check claims, remember what you've already said, draft in your voice and help you decide what deserves your attention.
+Its optional account connector reads your own LinkedIn profile, career sections,
+recent own posts and a bounded feed sample to build reusable professional context.
+It can analyze your observed or imported LinkedIn activity, identify worthwhile opportunities, research topics, check claims, remember what you've already said, draft in your voice and help you decide what deserves your attention.
 
 You stay in control.
 
@@ -14,11 +16,21 @@ You stay in control.
 
 ---
 
+## Reusable professional context
+
+After connecting LinkedIn, the agent builds private local professional memory.
+Optionally add a resume/CV, professional bio, personal website or other professional
+links now or later. Ask “What do you know about me?”, “Add my resume”, or “Correct my
+current role.” Conflicts and sources remain visible; user corrections persist.
+Most writing/context tasks reuse local memory and need no fresh account access.
+
+See [the memory guide](docs/PROFESSIONAL_MEMORY.md) for source management, privacy, export and reset.
+
 ## What it can do
 
 ### Analyse your LinkedIn presence
 
-Review imported:
+Review account-observed profile/posts/feed, plus optional imported:
 
 - profile information
 - posts
@@ -172,9 +184,10 @@ specialist discovery layer; its installed Exa content-returning transport stays
 disabled because index-only behavior is unverified. Standalone Python has no live
 search client; without a suitable session tool, discovery is unavailable.
 
-LinkedIn pages are not automatically opened or scraped. Search snippets are clues,
-not verified profiles. Name matches alone do not establish identity. To analyze
-LinkedIn profile/feed/inbox content, supply authorized exports, snapshots or text.
+The discovery workflow never opens candidate LinkedIn pages. The separate account
+gateway can read your own profile/posts/feed. Search snippets are clues,
+not verified profiles. Name matches alone do not establish identity. For inbox, network and analytics, supply authorized exports, snapshots or text;
+the account connector does not add those reads.
 Your own history, connections, comments and analytics are processed within normal
 resource limits, independently of discovery caps. Approved API access is a separate
 optional capability and currently unavailable. All LinkedIn actions remain yours.
@@ -389,40 +402,36 @@ Local storage does not mean every Codex interaction stays on your computer. Text
 
 ---
 
-## Current v1 scope
+## Connect LinkedIn
 
-LinkedIn Intelligence Agent v1 is an **import-based intelligence toolkit**.
+Ask Codex to set up the optional account connector, or run from the project folder:
 
-It does **not currently log into LinkedIn or maintain a live connection to your LinkedIn account**.
+```sh
+python3 tools/linkedin/setup.py --install --provision-browser --write
+python3 tools/linkedin/manage.py --root .linkedin-agent enable
+```
 
-LinkedIn information is provided through:
+Restart Codex if the new gateway is not visible, then ask:
 
-- authorized imports
-- local snapshots
-- supplied text
-- supported structured data
+> Connect LinkedIn and build my professional context from my profile and own posts.
 
-This means the intelligence workflows work today, but the system does not yet continuously inspect your live feed, inbox or account.
+If needed, a dedicated browser opens. You enter your credentials and complete
+verification there. Codex builds dated career, interest and voice context from the
+available reads; you do not normally copy profile/post text manually. An existing
+saved dedicated login may be reused. Curated voice and confirmed facts stay intact.
 
-That distinction is deliberate and clearly separated from the optional web-research layer.
-
----
+This optional connection uses a **third-party browser-automation connector**, not
+LinkedIn OAuth or an approved API. It exposes only bounded own-profile/posts/feed
+reads and session closure. Inbox and every write action remain unavailable. Core
+writing and local intelligence still work without it. See the [connection guide](docs/ACCOUNT_CONNECTOR.md)
+and [actual validation](docs/ACCOUNT_CONNECTOR_REVIEW.md).
 
 ## Operating modes
 
-### Manual
-
-You provide the profile, post, comment, message or other information you want analyzed.
-
-### Imported intelligence
-
-You provide structured LinkedIn snapshots, history or analytics and the agent can use that context across its workflows.
-
-### Optional research
-
-The agent can retrieve public web information when current evidence or wider context is useful.
-
----
+- **ACCOUNT_CONNECTED:** restricted gateway reads when enabled and relevant.
+- **LOCAL_CACHE:** dated normalized account context without unnecessary requests.
+- **IMPORT / USER_SUPPLIED:** authorized additional data or explicit fallback.
+- **Public research:** existing separate router for useful external evidence.
 
 ## Designed to degrade gracefully
 
@@ -534,6 +543,8 @@ For the shortest setup path:
 - [LinkedIn Discovery Mode](docs/LINKEDIN_DISCOVERY.md)
 - [LinkedIn Product Limits](docs/POLICY_LIMITS.md)
 - [LinkedIn Intelligence Review](docs/LINKEDIN_INTELLIGENCE_REVIEW.md)
+- [Connect LinkedIn](docs/ACCOUNT_CONNECTOR.md)
+- [Account Connector Review](docs/ACCOUNT_CONNECTOR_REVIEW.md)
 
 ---
 
@@ -541,13 +552,18 @@ For the shortest setup path:
 
 **Current validation: PASS WITH LIMITATIONS**
 
-The expanded discovery and enrichment implementation passes **310 automated tests**,
-including 37 tests for the new intelligence workflow. All 20 Skills validate.
+The account-connected and professional-memory implementation passes **453 core automated tests** plus
+**9 optional MCP tests**. All 20 Skills validate. The suite includes 81 new memory/onboarding tests.
+See [the memory review](docs/PROFESSIONAL_MEMORY_REVIEW.md). Live profile, own-post and feed
+reads, dedicated-session reuse and a private brief/draft were exercised. A new
+manual login and real authentication challenge were not exercised; see the
+[account acceptance review](docs/ACCOUNT_CONNECTOR_REVIEW.md).
 See the [current review](docs/LINKEDIN_INTELLIGENCE_REVIEW.md) for findings,
 validation and remaining limitations. The [v1 release audit](docs/V1_RELEASE_AUDIT.md)
 records the earlier 228-test baseline and optional web-tooling checks.
 
-LinkedIn account data remains import-based. External discovery is available through
+The optional restricted account connector now supports live account observations;
+see its separate acceptance report. Inbox/network/analytics remain import-based. External discovery is available through
 an actual Codex search-only session handoff; the standalone Python bridge does not
 supply live discovery. The unaudited Agent Reach Exa transport remains disabled,
 and no approved LinkedIn API is configured. Public non-LinkedIn sources can enrich

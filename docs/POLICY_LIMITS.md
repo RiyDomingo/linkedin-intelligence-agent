@@ -1,5 +1,15 @@
 # LinkedIn intelligence product controls
 
+## Account-reading scope update
+
+The [restricted account connector](ACCOUNT_CONNECTOR.md) is an explicit bounded own-profile/posts/feed
+read exception to the earlier import-only scope. It calls pinned mcp-server-linkedin
+directly through a project gateway; Agent Reach remains in research/discovery.
+Generic providers still cannot fetch/login to LinkedIn, external discovery stays
+separate, inbox is excluded and all write actions remain disabled. Earlier audits
+and zero-access observations describe their original validation, not this new path.
+
+
 These controls supersede the earlier 10/50 discovery model. They do not change the
 human-action boundary or authorize direct LinkedIn scraping.
 
@@ -55,8 +65,12 @@ or tracking is required for curated relationship context.
 
 ## RED: direct automation
 
-No profile/company/post/search scraping, feed/connection/follower harvesting, login,
-cookie/session reuse, CAPTCHA solving, evasion, or automated account actions.
+Generic research/discovery providers cannot scrape LinkedIn profiles, companies,
+posts or feeds, log into accounts or reuse account sessions. The sole account-read
+exception is the explicitly enabled restricted gateway described in
+[ACCOUNT_CONNECTOR.md](ACCOUNT_CONNECTOR.md): manual dedicated login and bounded
+own-profile, own-post and feed reads. Inbox and account writes remain excluded.
+No CAPTCHA solving, evasion or alternate scraper fallback is allowed.
 Providers cannot use a discovered LinkedIn URL as a second-stage retrieval target.
 All posts, likes, comments, replies, connections, follows, DMs and profile edits
 remain human-executed. The system researches, recommends and drafts.

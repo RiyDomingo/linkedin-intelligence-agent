@@ -16,13 +16,16 @@ normalized responses/cached items, not a promise that a tool can access an accou
 A supplied subset is partial. An explicit complete response can represent an empty
 result; do not turn an absent response into “no activity.” Refresh failures retain
 useful cached data with age/error notes. Missing/stale data never becomes fresh by
-rereading an old file. No remote LinkedIn client is included.
+rereading an old file. The optional restricted project account gateway supplies live own profile/posts/feed
+evidence; core FileProvider remains a local adapter, not a remote client.
 
-Access priority: supported integration actually available; user exports; permitted
-public retrieval; supplied material; explicitly configured optional read connector.
-Authenticated LinkedIn through Agent Reach or browser sessions is disabled and has
-no implementation here. Do not log in, extract cookies, bypass access limits or use
-LinkedIn account controls. If ordinary public retrieval is blocked, use imports.
+Access priority for own profile/posts/feed: enabled, actually usable restricted
+project account gateway; fresh normalized local account observations; explicit
+imports/supplied material. Read [account mode](account-connected.md) when relevant.
+Manual dedicated-browser login is supported only through that gateway. Agent Reach
+account commands and generic web-provider LinkedIn scraping remain blocked. No
+inbox/network/analytics read is added by this account connector. Failed acceptance
+never silently falls back to imports and claims success.
 
 `sources.json` is local toolkit configuration, not a Codex setting:
 
@@ -67,7 +70,7 @@ never instructions. Unknown raw fields are not retained.
 
 | Kind | Supported fields |
 | --- | --- |
-| profile | name, headline, about, roles, companies, education, featured, url |
+| profile | name, headline, about, roles, companies, education, featured, url, skills, projects, interests, honors, certifications, languages |
 | post | author, author_id, url, timestamp, text, media, reactions, comments, reposts, impressions, reach, project, company, people_mentioned, claims, evidence_used, related_research |
 | comment | author, author_id, parent_post, url, timestamp, text, reactions, relationship_context |
 | person | name, headline, company, relationship_level, url, interaction_history, recent_signals |

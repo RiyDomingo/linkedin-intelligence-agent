@@ -1,5 +1,15 @@
 # Unified research integration
 
+## Account-reading scope update
+
+The [restricted account connector](ACCOUNT_CONNECTOR.md) is an explicit bounded own-profile/posts/feed
+read exception to the earlier import-only scope. It calls pinned mcp-server-linkedin
+directly through a project gateway; Agent Reach remains in research/discovery.
+Generic providers still cannot fetch/login to LinkedIn, external discovery stays
+separate, inbox is excluded and all write actions remain disabled. Earlier audits
+and zero-access observations describe their original validation, not this new path.
+
+
 ## Working gap analysis (before integration)
 
 | Component | Existing implementation | Gap / smallest change |
@@ -149,8 +159,9 @@ Bridge browser guards reject LinkedIn/private DNS destinations and non-read requ
 block service workers and WebSockets, and fetch without redirect following before
 fulfilling responses. Redirects are refused; supply the canonical public URL. DNS resolution/connection races, third-party runtime behavior and malicious UI controls still require trusted public sources and
 operator review. This is not an arbitrary hostile-input fetch service or egress sandbox.
-No login, CAPTCHA solving, cookie import, private-account escalation or autonomous
-LinkedIn actions are added. See SECURITY.md and VALIDATION.md for actual test results.
+The public research bridge adds no login, CAPTCHA solving, cookie import,
+private-account escalation or autonomous LinkedIn actions. The separate optional
+account gateway is documented in [ACCOUNT_CONNECTOR.md](ACCOUNT_CONNECTOR.md). See SECURITY.md and VALIDATION.md for actual test results.
 
 ## LinkedIn discovery route
 

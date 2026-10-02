@@ -4,7 +4,11 @@
 
 LinkedIn Intelligence Agent is a set of Codex Skills and local tools that help you review imported LinkedIn information, find ideas, plan content, draft posts and replies, and learn from your real publication history.
 
-**The current toolkit is import-based.** It does not log into LinkedIn or read your live account. You supply authorized snapshots (saved copies at a particular time), exports or pasted content. Installing a research browser does not change this.
+**Account connection is optional and preferred for onboarding when configured.**
+Follow [Connect LinkedIn](ACCOUNT_CONNECTOR.md): install the restricted connector,
+sign in yourself in its dedicated browser, and let Codex build professional context.
+The core setup below works without login; imports remain an alternative. Generic
+research browsers do not grant account access.
 
 > **You control LinkedIn.** The agent drafts and recommends. It does not press LinkedIn's Post, Comment, Like, Connect or Send buttons, or edit your profile. Agent suggests → you review → you decide → you perform the LinkedIn action.
 
@@ -138,13 +142,15 @@ You now have the basic installation. Continue below to personalize it and add re
 
 ## First Run
 
-### Step 5 — Set up your profile a little at a time
+### Step 5 — Connect LinkedIn and build your profile context
 
 **Ask Codex:**
 
-> Set up my LinkedIn Intelligence Agent. Use the local .linkedin-agent context. Ask for the minimum useful information first, preserve existing files, and leave unknown facts as placeholders. Do not access LinkedIn.
+> Connect LinkedIn through the restricted account gateway and build my professional context from my profile and own posts. Preserve curated files and label inferred interests and voice traits. Help me complete manual login if needed.
 
-Codex should apply `li-context`, read the templates and help fill them using what you actually provide. It should not claim to know your job or achievements from the installation itself.
+Codex should apply li-context and li-read, follow [the account setup](ACCOUNT_CONNECTOR.md),
+then normalize actual account observations and save dated summaries. Without the
+optional connector, explicitly use imports or supplied information. It should not claim to know your job or achievements from the installation itself.
 
 | Local file | What to provide |
 | --- | --- |
@@ -164,9 +170,11 @@ Run the context `status` command from Step 3 again to check progress. A complete
 
 ## Teach It How You Write
 
-### Step 6 — Supply three real samples
+### Step 6 — Review the observed voice assessment, or supply samples
 
-The context Skill asks for **three actual writing samples**. Choose posts you wrote yourself that sound representative of you. Remove confidential or unnecessary personal details before pasting them.
+The context Skill can use your available own posts through the connector. Review
+its inferred voice assessment before changing curated voice.md. If those reads
+are unavailable or insufficient, provide **three actual writing samples**. Choose posts you wrote yourself that sound representative of you. Remove confidential or unnecessary personal details before pasting them.
 
 **Ask Codex:**
 
@@ -180,7 +188,10 @@ Check its proposed `identity/voice.md`. Repeat the rewrite request with another 
 
 ### Step 7 — Start with pasted content
 
-**Account access** would mean logging in and fetching your live account. This toolkit does not do that. **Imported data** is a local copy you are authorized to use. It represents only what you supplied, at the time supplied.
+**Account access** is supported by the separate restricted connector for your own
+profile/posts/feed. Use [that onboarding path](ACCOUNT_CONNECTOR.md) before manual
+copying. The following steps explain the optional import path, including data the
+connector does not read. **Imported data** is a local copy you are authorized to use. It represents only what you supplied, at the time supplied.
 
 The easiest input is text pasted into Codex: a post, its comments, your profile sections, or your analytics. Pasted text works for a one-off draft/review. It does **not** become saved import data automatically unless you ask Codex to save/import it.
 
@@ -593,3 +604,13 @@ python3 scripts/install_skills.py --dest "$HOME/.agents/skills"
 - [Orchestration](ORCHESTRATION.md): routing/evidence/capability limits.
 - [v1 release audit](V1_RELEASE_AUDIT.md): validated behavior and gaps.
 - [One-page quickstart](QUICKSTART.md): shortest core route.
+
+## Reusable professional context
+
+After connecting LinkedIn, the agent builds private local professional memory.
+Optionally add a resume/CV, professional bio, personal website or other professional
+links now or later. Ask “What do you know about me?”, “Add my resume”, or “Correct my
+current role.” Conflicts and sources remain visible; user corrections persist.
+Most writing/context tasks reuse local memory and need no fresh account access.
+
+See [the memory guide](PROFESSIONAL_MEMORY.md) for source management, privacy, export and reset.

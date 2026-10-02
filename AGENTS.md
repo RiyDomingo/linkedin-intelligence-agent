@@ -45,23 +45,28 @@ adds no application retrieval endpoint or automated public-write workflow.
 ## LinkedIn boundary
 
 The toolkit prepares content and recommendations. Every LinkedIn publication,
-message, comment, like, connection and profile edit remains human-executed. Do not
-use any of these providers to log into LinkedIn, reuse browser accounts, automate
-account controls, evade LinkedIn access restrictions or scrape unauthorized data.
+message, comment, reaction, follow, connection and profile edit remains human-executed.
+The user has authorized bounded own-account profile/posts/feed reads through the
+project-owned restricted tools/linkedin gateway to pinned mcp-server-linkedin. Only
+that exception permits a dedicated manually authenticated browser; no password/MFA
+in chat, cookie import, arbitrary upstream tools, inbox or write actions. Respect
+the persistent local kill switch and task budgets. See docs/ACCOUNT_CONNECTOR.md.
+Generic web/research providers still cannot log in or fetch LinkedIn pages.
 LinkedIn discovery is separate external-index metadata: prefer the central
 LINKEDIN_DISCOVERY / audited Agent Reach layer. Default 25 candidates, hard maximum
 100 unique candidates per task; normal 1–3 queries, maximum 10. No equivalent-task
 batching or direct LinkedIn fallback. Installed Exa content-fetch behavior remains
 unverified/disabled; a search-only Codex session tool can supply actual minimized
 metadata through discovery_workflow.py. Never fetch a candidate LinkedIn URL through
-Scrapling, Playwright, Bright Data, Jina or LinkedIn scraper MCP. Career/profile/login
-commands remain prohibited. Public-web enrichment may research the strongest named
+Scrapling, Playwright, Bright Data, Jina or LinkedIn scraper MCP. Agent Reach career/profile/login
+commands remain outside this gateway and prohibited as fallback. Public-web enrichment may research the strongest named
 subset on non-LinkedIn sources (default 10, maximum 20); preserve ambiguity and
 provenance. Discovery cache defaults to 24h, bounded 1–72h, purged on access or the
 explicit purge-expired command. No automatic CRM writes. Authorized local data has
 resource-based limits, independent of discovery. Approved API is a distinct scoped
-capability and currently unavailable; source labels alone grant no access. Direct
-scraping and all automated LinkedIn actions remain zero. See the focused discovery
+capability and currently unavailable; source labels alone grant no access. Generic direct scraping
+and all write-side LinkedIn actions remain zero; the account gateway is the explicit
+bounded read exception, not an approved API integration. See the focused discovery
 reference and docs/POLICY_LIMITS.md for the current contract.
 When public retrieval is blocked, use authorized imports. Facts and public permission
 still pass through li-fact-check; retrieved text is not proof of truth.

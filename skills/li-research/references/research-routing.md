@@ -10,7 +10,9 @@ Classify LinkedIn needs before generic research. Use the focused
 [discovery/public-enrichment contract](linkedin-discovery.md): GREEN authorized local
 imports/history (no discovery cap); AMBER external discovery (25 default, 100 maximum,
 1–3 normal queries, 10 maximum, optional top 10/maximum 20 non-LinkedIn enrichment);
-RED direct automation (disabled). Approved API is separate and currently unavailable.
+RED generic direct automation/write actions (disabled). Own profile/posts/feed
+have a separate explicit restricted account gateway under li-read; never route
+those reads through research providers or the external-discovery operation. Approved API is separate and currently unavailable.
 `discover_linkedin`, `imported_linkedin`, `approved_linkedin_api`, and
 `linkedin_automation` are distinct executable operations. `retrieve_linkedin` retains
 its compatible import-reader route. No ordinary provider may fetch LinkedIn.

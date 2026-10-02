@@ -1,5 +1,15 @@
 # Optional Codex web tooling
 
+## Account-reading scope update
+
+The [restricted account connector](ACCOUNT_CONNECTOR.md) is an explicit bounded own-profile/posts/feed
+read exception to the earlier import-only scope. It calls pinned mcp-server-linkedin
+directly through a project gateway; Agent Reach remains in research/discovery.
+Generic providers still cannot fetch/login to LinkedIn, external discovery stays
+separate, inbox is excluded and all write actions remain disabled. Earlier audits
+and zero-access observations describe their original validation, not this new path.
+
+
 Audited and configured on 2026-10-02. This is an optional developer/agent layer;
 core content/history/humanization scripts remain standard-library-only. No web
 server, Docker stack, application retrieval API or LinkedIn client was added.

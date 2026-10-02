@@ -18,7 +18,9 @@ LABELS = {'manual': 'USER-PROVIDED', 'user_export': 'USER-PROVIDED',
 # None is retained for every missing optional field; no factual defaults.
 FIELDS = {
     'profile': {'name': 'str', 'headline': 'str', 'about': 'str', 'roles': 'list',
-                'companies': 'list', 'education': 'list', 'featured': 'list', 'url': 'url'},
+                'companies': 'list', 'education': 'list', 'featured': 'list', 'url': 'url',
+                'skills': 'strings', 'projects': 'strings', 'interests': 'strings',
+                'honors': 'strings', 'certifications': 'strings', 'languages': 'strings'},
     'post': {'author': 'str', 'author_id': 'str', 'url': 'url', 'timestamp': 'time',
              'text': 'str', 'media': 'list', 'reactions': 'num', 'comments': 'num',
              'reposts': 'num', 'impressions': 'num', 'reach': 'num', 'project': 'str',

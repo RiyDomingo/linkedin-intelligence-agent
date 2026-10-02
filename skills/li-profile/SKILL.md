@@ -7,7 +7,8 @@ description: "Audit or improve the actual available LinkedIn profile, falling ba
 
 Read [the shared context and approval contract](../li-context/references/context-contract.md) first.
 
-Read supplied profile sections and [the 12-part rubric](references/rubric.json).
+Use li-read to retrieve a fresh-enough account profile before asking for supplied
+sections. Read observed profile sections and [the 12-part rubric](references/rubric.json).
 Score each observed item with evidence and points lost. Mark unseen items
 unassessed; report assessed subtotal and possible points rather than scoring
 absence of input as absence of a feature. Fix in descending points lost: headline

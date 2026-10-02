@@ -1,37 +1,33 @@
 ---
 name: li-read
-description: "Inspect LinkedIn read-source status, import exports or normalize legitimate retrieved snapshots. Use for source setup, refresh and capability troubleshooting; this skill has no account controls."
+description: "Connect LinkedIn and read my profile, career, own posts or feed through the restricted account gateway. Use for account onboarding, relevant refreshes and source troubleshooting; imports remain a fallback."
 ---
 
 # li-read
 
-Read [the shared contract](../li-context/references/context-contract.md) first.
+Read [the shared contract](../li-context/references/context-contract.md) and
+[the read-source contract](references/read-contract.md).
 
-Read [the source contract](references/read-contract.md). Inspect available session
-tools and run `scripts/read_layer.py --root <project>/.linkedin-agent status`.
-`tools` detects command presence only; pass actually exposed session tool names with
-`--available-tool` when useful. Never equate installed tools with LinkedIn access.
+Prefer ACCOUNT_CONNECTED when the project gateway is installed, enabled and actually
+usable for the requested capability. Read [the account workflow](references/account-connected.md)
+for onboarding, refresh, normalization and failure handling. Inspect the actual
+session tool catalogue: only connector_status, read_my_profile, read_my_posts,
+read_feed and close_session belong to this connector. No inbox or account writes.
+Tool presence is not evidence of successful authentication or data acquisition.
 
-LinkedIn candidate discovery is separate: apply [li-research](../li-research/SKILL.md)
-for external-index metadata and bounded non-LinkedIn public enrichment. Discovery availability never grants profile,
-feed, network or inbox access. For actual LinkedIn content, use authorized imports,
-local snapshots or supplied text; do not fetch LinkedIn URLs through web providers,
-Jina, an authenticated scraper or browser automation. This
-package implements local import/snapshot adapters, not a remote account client. If
-legitimate session read tools expose requested data, use only their read operations,
-normalize the actual result to the envelope and import it. Otherwise use imports or
-state that the capability is unavailable. Do not activate authenticated browser
-sessions, scrape a feed or install providers merely to fill a gap.
+Otherwise identify LOCAL_CACHE, IMPORT or USER_SUPPLIED explicitly. Use
+`scripts/read_layer.py --root <project>/.linkedin-agent status`, `show`, local
+`refresh`, `import` or `import-csv` as appropriate. A local file refresh is not a live
+LinkedIn refresh. Do not silently substitute imports in an account acceptance test.
+Private imported messages still require retention opt-in and stay excluded by default.
+Preserve sources, nulls, coverage, errors and dates. Unseen sections remain unknown.
 
-Run `refresh` for enabled local snapshot providers. If data is stale, refresh through
-an available legitimate session tool where authorized, or ask for a newer export;
-rereading an old file is not refreshing LinkedIn. Inspect selected items with `show`;
-private records are excluded unless `--include-private` is deliberately supplied.
-Preserve nulls, source, dates, visibility and qualifications. Do not infer current
-facts from missing fields. The schema and CSV mapping live in the source contract.
+Candidate discovery remains separate: apply [li-research](../li-research/SKILL.md)
+for bounded external-index metadata and non-LinkedIn research. Never use generic
+Scrapling, Playwright, Bright Data, Jina or Agent Reach account commands as a fallback
+for the restricted account gateway. Stop on authentication challenges/restrictions;
+only the user completes login/verification in the dedicated connector browser.
 
-Use `import` for normalized JSON envelopes or `import-csv` with explicit source and
-column mapping. Core imports require no credentials. Private material requires
-explicit retention opt-in; never import full inbox/network data without purpose.
-`purge` previews only imported receipts/cache; `--confirm-import-purge` executes the
-reviewed local removal, preserving curated context/history and code.
+Local `purge` previews imported receipts/cache; `--confirm-import-purge` removes only
+its documented local files. Account observations/summaries have separate retention;
+closing the connector preserves authentication and curated context.

@@ -199,7 +199,7 @@ class ProviderGuardTests(unittest.TestCase):
                 self.assertEqual(self.bridge.network_url('https://'+host+'/'),'https://'+host+'/')
     def test_capability_reporting_separate_and_unaudited_live_path_off(self):
         with tempfile.TemporaryDirectory() as d:
-            providers=self.bridge.providers(d);cap=self.bridge.linkedin_capabilities(providers)
+            providers=self.bridge.providers(d);cap=self.bridge.linkedin_capabilities(providers,d)
             self.assertEqual(cap['discovery']['state'],'UNAVAILABLE');self.assertEqual(cap['profile_read'],'IMPORT ONLY')
             self.assertFalse(next(p for p in providers if p.id=='agent_reach_discovery').available)
             self.assertFalse(next(p for p in providers if p.id=='agent_reach').enabled)

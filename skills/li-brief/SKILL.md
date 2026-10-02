@@ -8,7 +8,8 @@ description: "Review my LinkedIn and identify what deserves attention today, inc
 Read [the shared contract](../li-context/references/context-contract.md) first.
 
 1. Apply [li-read](../li-read/SKILL.md). Inspect status, refresh legitimate available
-   reads and fall back to imports. Report gaps and dates; don't claim to see a feed
+   account reads through the restricted gateway when needed; identify cache/import
+   alternatives explicitly on failure, without claiming live success. Report gaps and dates; don't claim to see a feed
    or inbox that is unavailable. Review only relevant items, not the whole network.
 2. Run the sibling li-read `scripts/intelligence.py --root <data-root> brief` for
    supported candidates, relationship obligations, freshness and transparent reasons.

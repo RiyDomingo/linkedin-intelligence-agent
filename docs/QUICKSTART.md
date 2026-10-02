@@ -76,5 +76,27 @@ Supply three real writing samples. Use the full guide to
 [add authorized LinkedIn information](BEGINNER_SETUP.md#give-the-agent-linkedin-information)
 or try its separate fictional practice import.
 
-**Import-based, not live account access.** The agent drafts and recommends;
-you review, decide and perform every LinkedIn action yourself.
+## 5. Connect LinkedIn (optional account onboarding)
+
+```sh
+python3 tools/linkedin/setup.py --install --provision-browser --write
+python3 tools/linkedin/manage.py --root .linkedin-agent enable
+```
+
+Restart Codex if needed, then ask: "Connect LinkedIn and build my professional
+context from my profile and own posts." Sign in yourself in the dedicated browser
+if requested. The connector can reuse an existing saved login. No password in chat.
+See [requirements, actual validation and limitations](ACCOUNT_CONNECTOR.md).
+
+The account connector reads only bounded own profile/posts/feed. It is third-party
+browser automation, not an approved API. You perform every LinkedIn write action.
+
+## Reusable professional context
+
+After connecting LinkedIn, the agent builds private local professional memory.
+Optionally add a resume/CV, professional bio, personal website or other professional
+links now or later. Ask “What do you know about me?”, “Add my resume”, or “Correct my
+current role.” Conflicts and sources remain visible; user corrections persist.
+Most writing/context tasks reuse local memory and need no fresh account access.
+
+See [the memory guide](PROFESSIONAL_MEMORY.md) for source management, privacy, export and reset.

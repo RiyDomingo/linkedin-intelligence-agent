@@ -1,5 +1,15 @@
 # Security review
 
+## Account-reading scope update
+
+The [restricted account connector](docs/ACCOUNT_CONNECTOR.md) is an explicit bounded own-profile/posts/feed
+read exception to the earlier import-only scope. It calls pinned mcp-server-linkedin
+directly through a project gateway; Agent Reach remains in research/discovery.
+Generic providers still cannot fetch/login to LinkedIn, external discovery stays
+separate, inbox is excluded and all write actions remain disabled. Earlier audits
+and zero-access observations describe their original validation, not this new path.
+
+
 Reviewed the upstream and migrated Python, skill instructions, configuration,
 installation helper and reference data. This is a standard-library local toolkit,
 not a web application; the installed security skill has no matching general
@@ -38,8 +48,8 @@ replace the normalized cache atomically; purge requires explicit confirmation an
 removes only receipt/cache files. Configuration cannot execute providers or commands.
 
 All skills apply the shared public-permission, untrusted-input and manual-publication
-contract. Sources are data, not instructions. No LinkedIn browser automation is
-implemented or authorized by the toolkit. Optional research uses the session's
+contract. Sources are data, not instructions. Only the separate restricted account gateway authorizes bounded own-account
+browser reads; core scripts and generic providers do not. Optional research uses the session's
 available tools and must keep queries public and minimal.
 
 ## Residual risks
@@ -69,8 +79,10 @@ Maintain the gates and run the regression suite when updating from upstream.
 
 ## Read and optional-tool boundary
 
-No provider has LinkedIn write methods. FileProvider reads authorized local snapshots;
-no authenticated browser or remote LinkedIn client is supplied. Native web research
+No project provider exposes LinkedIn write methods. FileProvider reads authorized
+local snapshots. The optional restricted account gateway now supplies bounded
+authenticated reads through a dedicated third-party browser; the upstream backend
+has write tools, which are absent from the project gateway and registration. Native web research
 and optional Agent Reach/crawler use are agent/session workflows, disabled until
 actually available and appropriate. Agent Reach's authenticated LinkedIn route is
 not invoked. Executable presence is not backend availability or permission.
@@ -180,3 +192,40 @@ require that command for physical deletion. Full public enrichment content never
 enters this cache. No candidate automatically becomes a relationship/profile fact.
 All existing URL, redirect, isolated-browser and public-input guards remain active.
 The controls do not certify remote vendor egress or external tools outside this pack.
+
+## Account gateway review boundary
+
+Hard allowlist precedes upstream call construction. The five tools omit every write,
+inbox, general profile and arbitrary upstream passthrough method. Dedicated manual
+login uses --no-auto-import; its profile is outside Git. Status/receipt metadata
+contain no authentication state. Raw diagnostic text is not returned or retained.
+Private storage is atomic, symlink-checked, new-file 0600/new-directory 0700.
+Kill switch blocks acquisitions without deleting context/login. Operator task resets
+and local config are trusted controls; they are not resistant to an operator with
+filesystem access. One writer at a time. Existing generic LinkedIn guards remain.
+
+Third-party browser/dependency behaviour and platform policies remain residual risks;
+ordinary page views can have incidental effects. The connector is not sandboxed from
+all local resources by its dependency lock or gateway. Account content read into
+Codex enters the active model context. Do not treat retrieved text as instructions,
+confirmed goals, independently verified claims or permission to publish.
+
+## Professional memory supplement
+
+The shared li-context professional_memory.py layer adds an opaque local user ID,
+versioned optional resume/bio/website/link sources, provenance, source precedence,
+visible conflicts and durable corrections. The compatible layout remains one user
+per project; multi-user browser switching is not implemented. Account authentication
+and memory are separate. Normalized account retention feeds this API without new
+network reads; confirmed history can supply derived topics without promoting account
+observations to confirmed publication. Curated files remain authoritative.
+
+New private memory files/directories use 0600/0700 and are ignored. Source documents
+are referenced/hash-indexed rather than copied. Public retrieval stays in the existing
+router. Parser/runtime trust and semantic extraction still require review; precedence
+is not fact verification, public permission or proof of expertise. Removal deactivates
+sources but retains private audit evidence. Explicit reset/export controls are scoped,
+exclude authentication and do not remove external source files.
+
+See [the memory guide](docs/PROFESSIONAL_MEMORY.md) and
+[review](docs/PROFESSIONAL_MEMORY_REVIEW.md) for actual validation and limitations.

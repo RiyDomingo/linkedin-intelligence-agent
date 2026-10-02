@@ -170,3 +170,38 @@ The local checkout folder and `.linkedin-agent/` data paths are retained for
 compatibility with existing context and generated absolute MCP paths. The installer
 retains its established attribution filenames for compatibility. Renaming the
 GitHub repository does not commit or push the local migration.
+
+## Optional account-connected milestone (2 October 2026)
+
+The former import-first default now has an explicitly enabled account path through
+[the restricted gateway](docs/ACCOUNT_CONNECTOR.md). The pinned third-party backend
+is isolated under tools/linkedin; generic research/discovery LinkedIn blocks remain.
+Only five project read/lifecycle tools are registered, with no inbox or account writes.
+Manual dedicated-browser authentication replaces neither the Skills installation nor
+the existing research router. Normalized observations and labelled dated summaries
+enrich preserved curated context. Imports remain available as fallback.
+
+The live acceptance and exact test results are recorded in
+[ACCOUNT_CONNECTOR_REVIEW.md](docs/ACCOUNT_CONNECTOR_REVIEW.md). Existing MIT LICENSE,
+Jake Schincariol attribution and all 20 Skills are preserved; this addition does not
+imply LinkedIn, OpenAI or upstream endorsement.
+
+## Professional memory supplement
+
+The shared li-context professional_memory.py layer adds an opaque local user ID,
+versioned optional resume/bio/website/link sources, provenance, source precedence,
+visible conflicts and durable corrections. The compatible layout remains one user
+per project; multi-user browser switching is not implemented. Account authentication
+and memory are separate. Normalized account retention feeds this API without new
+network reads; confirmed history can supply derived topics without promoting account
+observations to confirmed publication. Curated files remain authoritative.
+
+New private memory files/directories use 0600/0700 and are ignored. Source documents
+are referenced/hash-indexed rather than copied. Public retrieval stays in the existing
+router. Parser/runtime trust and semantic extraction still require review; precedence
+is not fact verification, public permission or proof of expertise. Removal deactivates
+sources but retains private audit evidence. Explicit reset/export controls are scoped,
+exclude authentication and do not remove external source files.
+
+See [the memory guide](docs/PROFESSIONAL_MEMORY.md) and
+[review](docs/PROFESSIONAL_MEMORY_REVIEW.md) for actual validation and limitations.

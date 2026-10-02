@@ -306,7 +306,11 @@ def linkedin_capabilities(available, root='.linkedin-agent', session_search_avai
     supplied = status(root)['capabilities']
     index = next((p for p in available if p.id == 'agent_reach_discovery'), None)
     standalone = bool(index and index.available and index.enabled)
-    return {'discovery': {'state': 'AVAILABLE' if standalone else 'PARTIAL' if session_search_available else 'UNAVAILABLE',
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'linkedin'))
+    from gateway import Gateway
+    installed = (Path(__file__).resolve().parents[1] / 'linkedin/.venv/bin/python').is_file()
+    account = Gateway(root, None, installed=installed).status()
+    return {'account_connector': account, 'discovery': {'state': 'AVAILABLE' if standalone else 'PARTIAL' if session_search_available else 'UNAVAILABLE',
                 'transport': 'codex_session_search' if session_search_available else None,
                 'reason': 'Session search-only handoff is supported; standalone Exa remains disabled without an audited index-only contract',
                 'default_results': DEFAULT_RESULTS, 'max_results': MAX_RESULTS,
@@ -318,7 +322,7 @@ def linkedin_capabilities(available, root='.linkedin-agent', session_search_avai
                              for cap in ('profile','own_posts','own_comments','feed','network','analytics','inbox')},
             'approved_api': {'state': 'UNAVAILABLE', 'reason': 'No approved remote API client/scoped grant configured'},
             'direct_scraping': 'DISABLED', 'automated_actions': 'DISABLED',
-            **{name: 'IMPORT ONLY' for name in ('profile_read','posts_read','feed_read','network_read','analytics','inbox')}}
+            **{name: ('ACCOUNT CONNECTOR / CACHE / IMPORT' if account['enabled'] and installed and name in ('profile_read','posts_read','feed_read') else 'IMPORT ONLY') for name in ('profile_read','posts_read','feed_read','network_read','analytics','inbox')}}
 
 
 def inspect_agent_reach_configuration():
