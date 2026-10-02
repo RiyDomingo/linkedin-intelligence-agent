@@ -152,28 +152,37 @@ The router is designed to use the simplest and lowest-cost suitable method rathe
 
 ---
 
-### LinkedIn Discovery Mode
+### LinkedIn discovery and public research
 
 Ask:
 
-> Find up to 30 LinkedIn profiles relevant to sports biomechanics.
+> Find 25 people on LinkedIn working on sports biomechanics, and research the most relevant candidates using public sources.
 
-Discovery is a separate, limited search workflow: Agent Reach is the preferred
-entrypoint for **external search/index metadata**, with 10 candidates by default
-and a hard maximum of 50 per request. Results remain `DISCOVERY_ONLY`; snippets are
-not verified profile facts. There is no automatic profile opening, scraping,
-enrichment, relationship recording or provider escalation. To analyze a profile,
-provide an authorized snapshot or paste the relevant information.
+The agent can discover candidates through external search/index metadata, deduplicate
+and rank them, then research a useful subset through university pages, papers,
+company sites and other permitted public sources. Defaults are 25 candidates and
+1–3 queries; hard task limits are 100 unique candidates and 10 queries. Automatic
+public enrichment defaults to 10 candidates, maximum 20. Fresh minimal discovery
+metadata can be reused for 24 hours.
 
-**Current availability: UNAVAILABLE for live discovery.** The inspected Agent Reach
-Exa MCP search exposes content but no option guaranteeing index-only retrieval.
-That path remains disabled instead of risking automatic LinkedIn page retrieval.
-Routing, limits and metadata handling are implemented and tested with offline
-fixtures. See [LinkedIn Discovery Mode](docs/LINKEDIN_DISCOVERY.md) for the capability
-matrix and audit. Core writing/imports and supported ordinary research still work.
+**Current availability: PARTIAL in a Codex session with a search-only web tool.**
+The session search handoff was validated with actual index results and a non-LinkedIn
+source retrieved through Scrapling. Agent Reach remains the preferred audited
+specialist discovery layer; its installed Exa content-returning transport stays
+disabled because index-only behavior is unverified. Standalone Python has no live
+search client; without a suitable session tool, discovery is unavailable.
 
-The result cap is a product boundary, not permission to scrape or a legal compliance
-guarantee. Platform and index usage rules may change.
+LinkedIn pages are not automatically opened or scraped. Search snippets are clues,
+not verified profiles. Name matches alone do not establish identity. To analyze
+LinkedIn profile/feed/inbox content, supply authorized exports, snapshots or text.
+Your own history, connections, comments and analytics are processed within normal
+resource limits, independently of discovery caps. Approved API access is a separate
+optional capability and currently unavailable. All LinkedIn actions remain yours.
+
+Discovery limits are conservative product controls designed to prevent bulk
+harvesting and unnecessary external requests. They are not LinkedIn-issued quotas
+and do not create permission to scrape LinkedIn. See [the current discovery guide](docs/LINKEDIN_DISCOVERY.md)
+and [product limits](docs/POLICY_LIMITS.md).
 
 ---
 
@@ -523,26 +532,27 @@ For the shortest setup path:
 - [Orchestration](docs/ORCHESTRATION.md)
 - [V1 Release Audit](docs/V1_RELEASE_AUDIT.md)
 - [LinkedIn Discovery Mode](docs/LINKEDIN_DISCOVERY.md)
+- [LinkedIn Product Limits](docs/POLICY_LIMITS.md)
+- [LinkedIn Intelligence Review](docs/LINKEDIN_INTELLIGENCE_REVIEW.md)
 
 ---
 
 ## Project status
 
-**v1: Ready with minor limitations**
+**Current validation: PASS WITH LIMITATIONS**
 
-The v1 release audit validated:
+The expanded discovery and enrichment implementation passes **310 automated tests**,
+including 37 tests for the new intelligence workflow. All 20 Skills validate.
+See the [current review](docs/LINKEDIN_INTELLIGENCE_REVIEW.md) for findings,
+validation and remaining limitations. The [v1 release audit](docs/V1_RELEASE_AUDIT.md)
+records the earlier 228-test baseline and optional web-tooling checks.
 
-- 228 automated tests
-- all 20 Skills
-- Scrapling MCP
-- Playwright MCP
-- public HTTP retrieval
-- provider routing
-- privacy and provenance controls
-- action boundaries
-- dependency compatibility
-
-The largest current limitation is that LinkedIn itself remains import-based rather than live-connected.
+LinkedIn account data remains import-based. External discovery is available through
+an actual Codex search-only session handoff; the standalone Python bridge does not
+supply live discovery. The unaudited Agent Reach Exa transport remains disabled,
+and no approved LinkedIn API is configured. Public non-LinkedIn sources can enrich
+selected candidates, with provenance and identity checks. All LinkedIn account
+actions remain human-executed.
 
 ---
 

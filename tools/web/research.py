@@ -300,17 +300,84 @@ def record_validation(result):
     atomic_save(ROOT, '.web-tools/health.json', rows)
 
 
-def linkedin_capabilities(available):
-    discovery = next((p for p in available if p.id == 'agent_reach_discovery'), None)
-    return {'discovery': {'state': 'AVAILABLE' if discovery and discovery.available and discovery.enabled else 'UNAVAILABLE',
-                          'reason': 'Current Exa MCP search has no audited index-only guarantee; direct reads remain blocked',
-                          'default_results': 10, 'max_results': 50, 'max_page_fetches': 0},
-            **{name: 'IMPORT ONLY' for name in ('profile_read', 'posts_read', 'feed_read', 'network_read', 'analytics', 'inbox')}}
+def linkedin_capabilities(available, root='.linkedin-agent', session_search_available=False):
+    from read_layer import status
+    from discovery import DEFAULT_RESULTS, MAX_RESULTS, DEFAULT_QUERY_BUDGET, MAX_QUERY_BUDGET
+    supplied = status(root)['capabilities']
+    index = next((p for p in available if p.id == 'agent_reach_discovery'), None)
+    standalone = bool(index and index.available and index.enabled)
+    return {'discovery': {'state': 'AVAILABLE' if standalone else 'PARTIAL' if session_search_available else 'UNAVAILABLE',
+                'transport': 'codex_session_search' if session_search_available else None,
+                'reason': 'Session search-only handoff is supported; standalone Exa remains disabled without an audited index-only contract',
+                'default_results': DEFAULT_RESULTS, 'max_results': MAX_RESULTS,
+                'default_queries': DEFAULT_QUERY_BUDGET, 'max_queries': MAX_QUERY_BUDGET,
+                'default_auto_enrichment': 10, 'max_auto_enrichment': 20, 'cache_ttl_hours': 24,
+                'max_page_fetches': 0, 'automated_actions': 0},
+            'imported_data': {cap: {'state': supplied[cap]['state'].upper(), 'records': supplied[cap]['cached_items'],
+                                   'adapter': 'AVAILABLE', 'acquisition': 'authorized local import/snapshot'}
+                             for cap in ('profile','own_posts','own_comments','feed','network','analytics','inbox')},
+            'approved_api': {'state': 'UNAVAILABLE', 'reason': 'No approved remote API client/scoped grant configured'},
+            'direct_scraping': 'DISABLED', 'automated_actions': 'DISABLED',
+            **{name: 'IMPORT ONLY' for name in ('profile_read','posts_read','feed_read','network_read','analytics','inbox')}}
+
+
+def inspect_agent_reach_configuration():
+    """Passive installed config metadata only; no doctor/backend/account probe."""
+    binary=shutil.which('agent-reach')
+    if not binary:
+        return {'external_search_configured':False,'linkedin_scraper_registered':False,'imports_unchecked':False}
+    try:
+        interpreter=Path(binary).read_text(encoding='utf-8').splitlines()[0].removeprefix('#!')
+        if not Path(interpreter).is_file():raise ValueError('No isolated interpreter')
+        code = ('import json; from agent_reach.channels.mcporter import inspect_mcporter_config; '
+                'i=inspect_mcporter_config(); print(json.dumps(dict('
+                'external_search_configured="exa" in i.server_names, '
+                'linkedin_scraper_registered=bool(i.server_names & {"linkedin","linkedin-scraper","linkedin-scraper-mcp","mcp-server-linkedin"}), '
+                'imports_unchecked=i.imports_unchecked)))')
+        proc=subprocess.run([interpreter,'-c',code],capture_output=True,text=True,timeout=10)
+        if proc.returncode:raise ValueError('Config metadata unavailable')
+        value=json.loads(proc.stdout)
+        fields={'external_search_configured','linkedin_scraper_registered','imports_unchecked'}
+        if set(value)!=fields or any(type(v) is not bool for v in value.values()):raise ValueError('Invalid metadata')
+        return value
+    except (OSError,ValueError,IndexError,subprocess.TimeoutExpired):
+        return {'external_search_configured':None,'linkedin_scraper_registered':None,'imports_unchecked':True}
+
+
+def agent_reach_health(available, root, session_search_available=False):
+    from read_layer import safe_path, read_text
+    path = safe_path(root, 'discovery/validation.json')
+    receipt = json.loads(read_text(path)) if path.exists() else None
+    if receipt is not None:
+        keys={'capability','transport','validated_at','query_count','direct_linkedin_fetches','note'}
+        if (not isinstance(receipt,dict) or set(receipt)!=keys or
+            receipt['capability']!='EXTERNAL_DISCOVERY_METADATA' or receipt['transport']!='codex_session_search' or
+            type(receipt['query_count']) is not int or not 1<=receipt['query_count']<=10 or receipt['direct_linkedin_fetches']!=0):
+            raise ValueError('Malformed discovery validation receipt')
+        parse_time(receipt['validated_at'])
+        receipt={k:receipt[k] for k in ('capability','transport','validated_at','query_count','direct_linkedin_fetches')}
+        receipt['note']='Session metadata attestation; no standalone connection test'
+    specialist = next((p for p in available if p.id == 'agent_reach'), None)
+    inspected=inspect_agent_reach_configuration()
+    return {'detected': bool(shutil.which('agent-reach')),
+            'configured': inspected['external_search_configured'],
+            'configuration': inspected,
+            'configuration_note': 'Passive mcporter names only; editor imports not expanded; accounts/backends not started',
+            'enabled': bool(specialist and specialist.enabled),
+            'discovery': {'state': 'PARTIAL' if session_search_available else 'UNAVAILABLE',
+                          'preferred': 'Agent Reach audited external-index orchestration',
+                          'session_transport': 'codex_session_search' if session_search_available else None,
+                          'exa_transport': 'DISABLED; no audited index-only contract'},
+            'specialist_platforms': sorted(specialist.capabilities) if specialist else [],
+            'linkedin_scraper': 'DISABLED', 'linkedin_credentials': 'NOT REQUIRED / NOT INSPECTED',
+            'last_discovery_validation': receipt,
+            'last_specialist_validation': sorted(specialist.validated) if specialist else []}
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', default='.linkedin-agent')
+    parser.add_argument('--session-search-available', action='store_true', help='Host declares a search-only session tool; not a standalone Python connection test')
     parser.add_argument('command', choices=['health', 'plan', 'run'])
     parser.add_argument('request', nargs='?')
     args = parser.parse_args()
@@ -319,7 +386,8 @@ def main():
         if args.command == 'health':
             from read_layer import status
             result = {'research_providers': health(available), 'linkedin_reader': status(args.root),
-                      'linkedin_capabilities': linkedin_capabilities(available),
+                      'linkedin_capabilities': linkedin_capabilities(available, args.root, args.session_search_available),
+                      'agent_reach': agent_reach_health(available, args.root, args.session_search_available),
                       'specialist_gaps': {'SOCIAL_REDDIT': 'AUTH_REQUIRED / no approved adapter',
                                           'SOCIAL_X': 'AUTH_REQUIRED / no approved adapter',
                                           'SOCIAL_YOUTUBE': 'Installed yt-dlp not validated by this adapter'}}
@@ -331,7 +399,7 @@ def main():
             if args.command == 'run':
                 record_validation(result)
         print(json.dumps(result, indent=2, ensure_ascii=False, allow_nan=False))
-        return 0 if args.command != 'run' or result['state'] in ('SUCCESS', 'CACHED', 'NO_RETRIEVAL', 'LINKEDIN_READER') else 2
+        return 0 if args.command != 'run' or result['state'] in ('SUCCESS', 'CACHED', 'NO_RETRIEVAL', 'LINKEDIN_READER', 'LINKEDIN_IMPORTED_DATA') else 2
     except (OSError, ValueError, KeyError, TypeError, RetrievalFailure) as exc:
         print(f'Research orchestration: {exc}', file=sys.stderr)
         return 2

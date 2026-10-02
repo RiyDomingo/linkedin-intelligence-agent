@@ -1,257 +1,230 @@
-# LinkedIn Discovery Mode: implementation and focused review
+# LinkedIn discovery, imports and public enrichment
 
-Audit date: 2026-10-02. Baseline: `a0f0bca`; clean working tree at task start.
+Updated 2026-10-02. Baseline: `9266272`; clean working tree at task start. This guide
+supersedes the previous task's 10/50 and no-enrichment model. Historical v1 audit
+records remain unchanged.
 
-## Verdict
+**Verdict: PASS WITH LIMITATIONS.** External discovery is validated through an actual
+search-only Codex session handoff. Public enrichment is validated through the existing
+Scrapling router. Standalone Python has no live search client; installed Exa discovery
+remains disabled because its index-only behavior is unverified. No approved LinkedIn
+API exists in this build. No direct LinkedIn page or account action was performed.
 
-**BLOCKED for live LinkedIn discovery.** The separate routing, bounded metadata
-pipeline and zero-fetch guards are implemented and tested. The currently inspected
-Agent Reach search transport cannot guarantee external-index-only operation, so
-no live discovery query is issued and no candidate list is fabricated.
+## What you can do
 
-This is a capability gap, not permission to enable a scraper. Core writing,
-authorized imports and supported ordinary research remain functional. No new
-service, database, account connection, dependency or Skill was added. All 20 Skills
-remain present. No commit, push, LinkedIn account action or LinkedIn-page validation
-request was performed.
+> Find 25 people on LinkedIn working on sports biomechanics, then research the most relevant candidates on the public web.
 
-## What discovery means
+The agent uses an exposed external search operation, collects minimal candidate
+metadata, deduplicates/ranks it, and can enrich the strongest named subset using
+non-LinkedIn sources. The example was validated with real index results and a
+[public university dissertation page](https://open.clemson.edu/all_dissertations/4239/).
+Search-only calls used no `open`, click or browser operation against LinkedIn.
+External engines maintain their own indexes; this project does not certify their
+historical crawling practices or perform LinkedIn page retrieval itself.
 
-Example request:
+The validation retained three actual candidates from one index query, reused the
+cache on lookup, and accepted one opened public-source enrichment receipt. This
+proves the session handoff, not guaranteed discovery of 25/100 relevant people for
+any topic. No candidates or full pages were committed; outputs stayed in private
+temporary files. Enrichment source observations remain NEEDS_VERIFICATION until
+exact claim/source/public-permission review through li-fact-check.
 
-> Find up to 30 LinkedIn profiles relevant to sports biomechanics.
+## Risk tiers and capabilities
 
-The intended route is:
-
-```text
-Public user query → LINKEDIN_DISCOVERY → audited Agent Reach external index
-→ at most 50 minimal candidates → local deduplication/ranking → STOP
-```
-
-The implemented route prefers only `agent_reach_discovery`, never a generic search,
-scraper or browser substitute. A trusted index-only adapter can supply packets to
-the core pipeline; offline tests exercise that contract. There is currently **no
-production index transport** wired to this provider. Changing an enabled flag does
-not supply one. The live provider is both unavailable and disabled.
-
-“Analyze this LinkedIn profile” takes a different path: LINKEDIN_READ → authorized
-import, supplied snapshot or pasted profile text. Discovery availability never
-grants profile, post, feed, network, analytics or inbox access.
-
-Natural-language routing is supported through the existing li-research and
-li-engagement descriptions/instructions. The Python classifier handles explicit
-LinkedIn discovery/search and read verbs conservatively; it is not a general
-natural-language intent model. Ambiguous requests require Codex interpretation.
-
-## Current LinkedIn capability matrix
-
-| Capability | Current behavior |
+| Capability | Current status |
 | --- | --- |
-| Discovery | UNAVAILABLE live; core route/metadata contract tested offline |
-| Profile read | IMPORT ONLY |
-| Post/comment read | IMPORT ONLY |
-| Feed read | IMPORT ONLY |
-| Network read | IMPORT ONLY; curated relationship context is separate |
-| Analytics | IMPORT ONLY / supplied measurements |
-| Inbox | IMPORT ONLY, explicit private-data handling |
+| External LinkedIn discovery | PARTIAL in a session with an exposed search-only tool; otherwise UNAVAILABLE |
+| Imported profile | Adapter AVAILABLE; data AVAILABLE/PARTIAL/STALE/UNAVAILABLE according to actual imports |
+| Imported posts | Same import coverage semantics; resource-based record limits |
+| Imported comments | Same import coverage semantics |
+| Imported feed | Same import coverage semantics |
+| Imported network | Same import coverage semantics |
+| Imported analytics | Same import coverage semantics |
+| Imported inbox | Same import coverage semantics; explicit private-data opt-in |
+| Approved LinkedIn API | UNAVAILABLE; no approved remote client or scope grants |
+| Direct LinkedIn scraping | DISABLED |
+| Automated LinkedIn actions | DISABLED |
 
-`tools/web/research.py health` reports this matrix separately from ordinary provider
-health. A disabled/unavailable discovery provider does not change reader status.
-`available`, `partial` or `stale` in the reader describes supplied coverage, not a
-live LinkedIn connection.
+GREEN is authorized local/supplied data and ordinary non-LinkedIn public research.
+AMBER is bounded external discovery with optional bounded public enrichment.
+RED is direct automated LinkedIn access/actions. See [product controls](POLICY_LIMITS.md).
+`LINKEDIN_IMPORTED_DATA`, `LINKEDIN_DISCOVERY`, `LINKEDIN_APPROVED_API`, and
+`LINKEDIN_DIRECT_AUTOMATION` are separate router capabilities. The legacy
+`retrieve_linkedin` operation retains its import-reader route.
 
-## Agent Reach configuration review
+A URL alone is not profile content. For “Analyze this profile,” first use authorized
+imports, supplied text/snapshots or permitted local evidence. No provider opens the
+LinkedIn URL. Wider public research is useful when identity clues can be resolved.
+`official`-tagged input snapshots do not grant API authorization.
 
-Inspected the installed Agent Reach Skill, search/career references, Exa/LinkedIn/web
-channel code and passive mcporter configuration inspection. Exa and a server named
-`linkedin` are configured globally; editor imports are present but were deliberately
-not expanded. These observations do not establish login state or authorized access.
-No global configuration, credential store or unrelated server was changed/started.
+## Limits and efficient execution
 
-| Installed path | Classification | Repository decision |
+| Setting | Default | Hard maximum |
+| --- | ---: | ---: |
+| Unique candidates/task | 25 | 100 |
+| Query budget | 3, normally use 1–3 | 10 |
+| Automatic public enrichment candidates | 10 | 20 |
+| Discovery TTL | 24h | Accepted range 1–72h |
+| Direct LinkedIn fetch/browser/scrape | 0 | 0 |
+| Automated LinkedIn actions | 0 | 0 |
+
+One canonical URL counts once across queries; tracking parameters/fragments and
+country/www variants collapse. Unknown names stay null. Query overlap is an inferred
+relevance signal, not a numerical probability of identity. Codex evaluates role,
+organization, topic, diversity, publications, recency and deliberately supplied
+relationship context where useful; no sensitive characteristics are inferred.
+
+The core executes only supplied bounded query variants, sequentially, and stops when
+enough candidates exist, a subsequent query adds none, two empty queries occur, or
+a provider fails. No discovery provider fallback or result-padding loop exists.
+Each adapter query requests only the remaining candidate allowance.
+At most 100 input rows per query are normalized; the combined set is capped at 100 unique
+returned candidates. This input bound keeps work small; it does not cap user imports.
+Search-only session tools must also honor the task budget **before** each actual
+call; replaying a receipt cannot retroactively undo a provider call.
+
+Automatic enrichment selects the strongest named subset. Missing identity clues are
+not invented. Each candidate accepts at most ten opened-source receipts as an
+engineering bound; prefer a small number of useful primary sources. Do not invoke
+paid search/managed retrieval or browsers merely to fill a count. User-selected
+larger public research is a separate deliberate task, without this automatic
+candidate limit. All authorized local/history records remain usable.
+
+## Actual Agent Reach role and availability
+
+Agent Reach is the preferred specialist discovery orchestration where an audited
+external-index capability exists, and retains its separate supported-platform role.
+It is not the universal web provider. The registry ID `agent_reach_discovery` is the
+logical discovery route; actual receipts identify `codex_session_search` when native
+search was used. This is not represented as an Agent Reach network call.
+
+Installed instructions/channel code and passive mcporter names were reviewed again.
+Exa and a LinkedIn scraper registration exist globally; editor imports were not
+expanded, credentials were not read/reused and servers were not started. Global
+configuration remains unchanged. Repository exclusions govern use here.
+
+| Installed/exposed path | Classification | Decision |
 | --- | --- | --- |
-| Exa `web_search_exa` through mcporter | Search; content/live-retrieval behavior UNKNOWN for the required index-only boundary | Unavailable/disabled for LinkedIn discovery |
-| Exa `web_fetch_exa` | DIRECT FETCH | Not selected for LinkedIn |
-| `linkedin.search_people` / `search_jobs` | AUTHENTICATED LinkedIn service, not an external index | Blocked, not invoked |
-| `linkedin.get_person_profile` / `get_company_profile` | DIRECT FETCH / SCRAPING / AUTHENTICATED | Blocked, not invoked |
-| LinkedIn MCP login command | AUTHENTICATED | Prohibited, not run |
-| Agent Reach generic WebChannel / Jina LinkedIn fallback | DIRECT FETCH | Blocked |
-| Existing public V2EX adapter | Separate specialist research | Preserved; existing source opt-in remains off |
-| Reddit/X authenticated paths; YouTube | Other specialist sources | Existing disabled/unvalidated/unsupported bridge status unchanged |
+| Codex session search-only operation | EXTERNAL_DISCOVERY | Supported metadata handoff; live search validated |
+| Agent Reach Exa `web_search_exa` | UNKNOWN content/live-fetch behavior | Disabled for LinkedIn; no unsupported parameters invented |
+| Exa `web_fetch_exa` | DIRECT_LINKEDIN_FETCH if given a LinkedIn URL | Blocked/not selected |
+| Agent Reach `linkedin.search_people/search_jobs` | AUTHENTICATED_LINKEDIN | Blocked/not invoked |
+| `get_person_profile/get_company_profile` | LINKEDIN_SCRAPING / AUTHENTICATED_LINKEDIN | Blocked/not invoked |
+| LinkedIn MCP login/cookie paths | AUTHENTICATED_LINKEDIN | Prohibited |
+| Jina LinkedIn reader fallback | DIRECT_LINKEDIN_FETCH | Prohibited |
+| Agent Reach V2EX | Separate supported specialist source | Preserved; existing opt-in remains unchanged |
+| Reddit/X/YouTube bridge gaps | Unavailable/unvalidated sources | Preserved; no accounts/backends enabled |
 
-The public Exa MCP schema was inspected without running a search. It exposes:
+The previously inspected Exa MCP schema has query/numResults/objective and returns
+clean content, without an enforceable index-only control. No Exa LinkedIn query was
+used in this task. Native search-only operation provides a useful alternative where
+actually exposed; without it, report the gap rather than activate a scraper.
 
-- `web_search_exa`: `query`, `numResults`, required `objective`; description says it
-  returns clean content. No `livecrawl: never`, metadata-only or equivalent control.
-- `web_fetch_exa`: `urls`, `maxCharacters`; a page reader, not discovery.
+## Local handoff and cache
 
-An objective saying “do not scrape” is prose, not an enforceable transport guarantee.
-No unsupported parameter was invented or passed. Resolving this gap requires an
-actual supported external-index API/tool with an audited no-page-retrieval contract
-and a narrow adapter. There is no proposed authentication/cookie workaround.
+Core code is standard-library-only and performs no network or account actions.
+Use [the skill-local contract](../skills/li-research/references/linkedin-discovery.md)
+for request and receipt schemas. Codex performs the actual session search and writes
+minimized receipts; the helper normalizes them. It cannot invoke Codex's native tool
+from a shell or attest cryptographically that a supplied receipt is genuine.
 
-## Limits and retention
+From the repository, after preparing the **actual** task request/receipts:
 
-| Boundary | Implemented value |
-| --- | --- |
-| Default result limit | 10 |
-| Hard result limit | 50 per request |
-| Default query budget | 1 |
-| Hard accepted query budget | 5 |
-| Current execution | At most one index-adapter call; no query/batch loop |
-| LinkedIn page fetches | 0 in discovery |
-| LinkedIn browser visits | 0 in discovery |
-| LinkedIn scrapes | 0 in discovery |
-| Current live calls | 0, because no audited transport is available |
+```sh
+python3 skills/li-research/scripts/discovery_workflow.py --root .linkedin-agent lookup request.json
+```
 
-Requests above 50 are clamped. An adapter response above 50 rows fails closed,
-rather than processing a harvested batch. Discovery failure never enters ordinary
-provider escalation, even for timeout/block/rate-limit errors. Query budget is an
-upper bound, not an instruction to run five queries. Model instructions also
-prohibit splitting one request into equivalent batches.
+For a cache MISS, use the actual search-only tool, then:
 
-Minimal output contains canonical LinkedIn URL/type, short search title/snippet,
-optional supplied display name, public query, provider, retrieval time and inferred
-relevance explanation. Titles/snippets are bounded; email/phone fields and opaque
-provider/profile blobs are not retained, and common contact/restricted text is
-removed from allowed text fields. This filtering is not a universal sensitive-data
-classifier. The caller must still supply only minimized public input.
+```sh
+python3 skills/li-research/scripts/discovery_workflow.py --root .linkedin-agent discover request.json search-results.json
+```
 
-Every candidate remains `DISCOVERY_ONLY`, `EXTERNAL_SEARCH_RESULT`, `SEARCH_METADATA`
-and untrusted. Missing names remain null. Rankings reflect text matches, not verified
-identity, expertise or relationship. No profile facts, metrics or connections are
-inferred. Coverage is partial, even when the requested count is reached.
+For useful selected public research:
 
-Results are ephemeral: no discovery cache, full search page, harvested database,
-read import or relationship store is written. The core ordinary evidence normalizer
-rejects discovery-tagged packets instead of promoting them into retrieved evidence.
-A caller can deliberately save console/chat output; keep any such file private and
-minimal. Provider validation receipts, if a supported future operation runs, store
-only capability/failure/time metadata, not candidates.
+```sh
+python3 skills/li-research/scripts/discovery_workflow.py --root .linkedin-agent enrichment-plan request.json result.json
+```
 
-## Provider guard matrix
+Retrieve opened non-LinkedIn sources through ordinary routing and supply reviewed
+receipts keyed by candidate URL:
 
-| Provider | May access LinkedIn pages? | Enforcement in this repository |
+```sh
+python3 skills/li-research/scripts/discovery_workflow.py --root .linkedin-agent enrich request.json result.json public-receipts.json
+```
+
+Commands emit JSON to stdout; keep any saved request/result file private and ignored.
+The discovery cache is ignored `.linkedin-agent/discovery/cache.json`, with new
+files 0600/directories 0700 on Unix. It stores minimal metadata/provenance only, at
+most 20 active tasks. It never writes imported read caches, curated relationships,
+metrics or claims. Full enrichment content is not stored in discovery cache.
+
+Expired cache entries are removed on lookup/write or explicitly:
+
+```sh
+python3 skills/li-research/scripts/discovery_workflow.py --root .linkedin-agent purge-expired
+```
+
+Task `max_age_hours` is also honored: zero forces fresh work, shorter budgets
+reject otherwise unexpired metadata. TTL controls reuse and purge on access, not background deletion: idle files need
+this command or manual removal. No scheduler/database or persistent harvested CRM
+was introduced. A minimal validation receipt stores only transport/time/count.
+
+## Public enrichment and identity
+
+Use normal routing for permitted public evidence: Scrapling ordinary pages,
+Playwright genuine interaction, Agent Reach supported specialist sources, Bright
+Data only as an explicitly permitted justified fallback. LinkedIn/Jina destinations
+remain blocked. No source quality, expertise or identity is verified merely by
+retrieval or domain name.
+
+A supplied name alone stays AMBIGUOUS. Name plus a professional organization/role/
+location/publication clue occurring in both index metadata and an opened source may
+be CORROBORATED_INFERRED. This is a heuristic association requiring semantic review;
+conflicting sources/ambiguous identities must not merge silently. Reranking considers
+corroborating observations then query relevance. Each source keeps URL/provider/time
+and a short excerpt; exact claims still require li-fact-check. All content is untrusted
+data, never tool/agent instructions. No sensitive trait or relationship is inferred.
+
+## Provider boundaries
+
+| Provider | LinkedIn pages allowed? | Permitted role |
 | --- | --- | --- |
-| Agent Reach discovery | No | Only the separate discovery capability can be selected; unaudited live transport disabled; no fallback |
-| Agent Reach career/LinkedIn scraper | No | Not a registered/selectable bridge component; instructions explicitly prohibit its installed commands |
-| Scrapling | No | Central URL/redirect guard plus pinned direct-MCP HTTP/browser bootstrap |
-| Playwright | No | Isolated/headless launcher, context-wide parsed-host guard, redirects blocked, service workers/websockets blocked |
-| Bright Data | No | Disabled; bridge preflight and server-side URL payload filter; only generic search/markdown tools allowlisted |
-| Jina Reader | No | Not a bridge component; wrapped LinkedIn targets refused, reader-proxy host blocked in active network/browser guards |
-| LinkedIn scraper MCP | No | Not a bridge component, never launched or selected; unrelated global registration left untouched |
+| Agent Reach | No | Audited index discovery and supported non-LinkedIn specialist research |
+| Scrapling | No | Non-LinkedIn public pages; existing HTTP/browser destination guards |
+| Playwright | No | Isolated read-only permitted public interaction; redirect/host guards |
+| Bright Data | No | Disabled by default; explicit public fallback only, guarded tool allowlist |
+| Jina/reader proxies | No | Not a selectable LinkedIn bypass |
+| LinkedIn scraper MCP | No | Not selected/launched, despite unrelated global registration |
+| Approved LinkedIn API | No current client | Future reviewed exact-scope integration, not a generic fetch exception |
 
-Python host checks cover `linkedin.com`, all subdomains, case, trailing dots and IDNA
-dots. Deceptive `notlinkedin.com` and `linkedin.com.evil.test` are not LinkedIn.
-Candidates discard tracking queries/fragments and collapse country/www host variants.
-Encoded malformed hosts and traversal paths are rejected. The HTTP adapter checks
-each redirect before the next request. Renderers do not follow unchecked redirects.
-MCP destination checks happen before server initialization, including paid startup.
+Direct destinations/subdomains, encoded malformed hosts and reader wrappers are
+checked; HTTP redirects are inspected before following and browser redirects stop.
+DNS checks are not an egress sandbox: DNS races, opaque vendor internal redirects and
+arbitrary external tools outside the repository remain outside this guarantee.
+Existing local MCP sessions and installed Skill copies need restart/update to load
+source changes. No dependency/server/account was installed or activated here.
 
-The Scrapling bootstrap guards both HTTP and rendered/session paths without editing
-installed third-party packages. It rejects browser/account reuse, cookies/proxies,
-nonlocal executable overrides and public write methods. Direct HTTP redirects are
-not followed; use the central checked HTTP path for permitted redirect inspection.
-Failed browser-hook setup closes the page before upstream can continue unguarded.
-Both ordinary HTTP and rendered fixture checks passed afterward.
+## Validation and review
 
-The managed preload filters URL-bearing API payloads and uses the same ESM Axios
-instance as the pinned server, including instances created through `axios.create`.
-LinkedIn-specific scraper tools are excluded server-side. Bright Data remains
-inactive; no token, billing/zone provisioning or live managed request was tested.
-Opaque third-party internal redirects/egress are not certified by these client
-checks. Do not enable a provider to get around the discovery boundary.
+**310 unittest tests passed; zero failures/skips.** This adds 37 intelligence
+regressions to the previous 273-test baseline. Old discovery tests were updated only
+for explicitly superseding limits/cache semantics; zero-fetch guards remain tested.
+Fixtures cover 4,500 authorized import records and 2,000 local history entries.
+All 20 Skills, syntax/compilation, local documentation links and Git whitespace were
+checked. Exact commands and focused findings are in
+[the second-pass review](LINKEDIN_INTELLIGENCE_REVIEW.md).
 
-Restart existing local MCP sessions to load changed launchers/hooks. Installed Skill
-copies also require the reviewed reinstall/update procedure; source edits do not
-silently replace private/local installation copies.
+Live validation: one external search-only discovery query; three minimized candidates;
+cache HIT; one permitted public source fetched successfully through Scrapling and
+accepted for enrichment. No browser/LinkedIn account action or LinkedIn page request
+was issued by the toolkit. The managed provider was not enabled or billed.
 
-## Focused independent-style security review
+Second-pass review was performed by the implementing agent in independent-engineer
+style, not a separate engineer's certification. Material input-trust, provenance,
+cache and routing findings were repaired and covered by regressions.
 
-A fresh second pass was performed by the implementing agent; this is not a separate
-engineer's certification. Findings were checked against executable paths and tests.
-
-1. **Availability blocker — unaudited index transport.** Exa's current schema cannot
-   enforce the requested index-only boundary. Kept unavailable/disabled in
-   [research.py](../tools/web/research.py#L268); no false “ready” claim.
-2. **Fixed — direct Scrapling MCP bypass.** Raw server requests could bypass central
-   LinkedIn checks. Added [guarded_scrapling.py](../tools/web/guarded_scrapling.py#L1)
-   through the existing launcher, including indirect browser/redirect checks.
-3. **Fixed — managed raw-tool URL exposure.** Added
-   [managed_guard.mjs](../tools/web/managed_guard.mjs#L1) and restricted the server's
-   tool allowlist. ESM/CJS instance mismatch was caught during review and corrected.
-4. **Fixed — failed browser setup could proceed.** Upstream catches setup errors;
-   the wrapper closes the page before raising, with a regression covering this.
-5. **Fixed — nested proxy/session options.** Bounded reader-proxy recursion and
-   rejected nested browser storage/session settings. Sensitive inputs are minimized;
-   heuristic redaction is not represented as a privacy guarantee.
-
-Review answers: no discovery candidate is automatically fetched; no discovery
-failure escalates; no scraper is selected; HTTP/browser redirects cannot automatically
-enter LinkedIn through the guarded local paths; caps have no internal batching loop;
-search provenance is retained; no relationship writes occur; documentation explicitly
-states the live gap. No claim is made that arbitrary external tools outside the
-repository, hostile local processes or opaque remote services are sandboxed by this.
-
-## Validation
-
-Current suite: **273 tests, all passed, zero failed/skipped**. Includes 45 new discovery,
-bootstrap and managed-guard regressions; existing v1 tests remain unchanged except
-for the launcher-path assertion reflecting the added guard.
-
-Commands run from the repository:
-
-```sh
-python3 -m unittest discover -s tests -q
-```
-
-```sh
-python3 -m unittest discover -s tests -p test_linkedin_discovery.py -v
-```
-
-```sh
-PYTHONPYCACHEPREFIX=/tmp/linkedin-discovery-pycache python3 -m compileall -q skills scripts tests tools/web
-```
-
-```sh
-node --check tools/web/public_guard.cjs
-```
-
-```sh
-node --check tools/web/managed_guard.mjs
-```
-
-```sh
-.venv/bin/python tools/web/verify_mcp.py scrapling
-```
-
-```sh
-.venv/bin/python tools/web/verify_mcp.py playwright
-```
-
-Both MCP smoke checks used only the public Quotes to Scrape fixture and closed their
-sessions. No real LinkedIn URL was sent to a transport in validation. Domain and
-redirect regressions use mocks. Managed guard tests use mock interceptors and the pinned ESM Axios instance with an
-offline adapter; no key or managed-server startup.
-All 20 Skills passed Skill Creator's validator using an existing isolated interpreter
-with YAML support, without adding a project dependency. Local links and Git diff
-whitespace were also checked.
-
-A minimized demonstration discovery request was run through plan/run: plan returned
-UNAVAILABLE; run returned no candidates/attempts and zero query/page counts, with
-expected exit code 2. Health reports discovery UNAVAILABLE independently of imports.
-
-## Use and limitations
-
-Ordinary user prompts do not need provider names. Today, a discovery prompt should
-explain the index-only capability gap instead of inventing results. Profile-analysis
-requests still work with supplied content. A separate request for wider public
-research may use university/publication/company sources, with identity disambiguation.
-It must never return to LinkedIn scraping or silently create relationship records.
-
-The 50-result ceiling is a technical product boundary, not legal advice, permission
-to scrape or proof of LinkedIn-policy compliance. Platform rules and external index
-usage restrictions can change; users/operators remain responsible for permitted use.
-
-MIT LICENSE and upstream attribution remain unchanged. Historical v1 release-audit
-claims are retained as historical evidence, not a claim of live discovery readiness.
+Remaining limitations: session-only live discovery, disabled unaudited Exa transport,
+no approved API, conservative lexical/identity heuristics, in-memory local processing,
+on-access cache deletion and remote egress limitations. None is hidden behind a READY
+claim. MIT attribution and upstream remote/LICENSE remain unchanged.

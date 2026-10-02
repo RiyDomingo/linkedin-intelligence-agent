@@ -13,7 +13,7 @@ tools and run `scripts/read_layer.py --root <project>/.linkedin-agent status`.
 `--available-tool` when useful. Never equate installed tools with LinkedIn access.
 
 LinkedIn candidate discovery is separate: apply [li-research](../li-research/SKILL.md)
-for external-index metadata, then stop. Discovery availability never grants profile,
+for external-index metadata and bounded non-LinkedIn public enrichment. Discovery availability never grants profile,
 feed, network or inbox access. For actual LinkedIn content, use authorized imports,
 local snapshots or supplied text; do not fetch LinkedIn URLs through web providers,
 Jina, an authenticated scraper or browser automation. This

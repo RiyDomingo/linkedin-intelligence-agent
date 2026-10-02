@@ -1,6 +1,6 @@
 ---
 name: li-research
-description: "Find LinkedIn candidate people, companies or posts through limited external-index discovery, or verify public context for a LinkedIn idea. Discovery stops at search metadata; profile analysis uses supplied/imported content. Simple rewrites need no research."
+description: "Find LinkedIn candidate people, companies or posts through limited external-index discovery, or verify public context for a LinkedIn idea. Discovery uses external index metadata with bounded public-source enrichment; profile content uses supplied/imported data. Simple rewrites need no research."
 ---
 
 # li-research
@@ -15,10 +15,13 @@ Simple rewrites/replies use local context unless facts genuinely need verificati
 
 For “Find people on LinkedIn working on X”, apply
 [LinkedIn discovery](references/linkedin-discovery.md) before ordinary retrieval.
-Discovery returns only bounded external search metadata and stops. Never open the
-candidate URLs, enrich profiles or save candidates as relationships. If the audited
-index-only capability is unavailable, say so; installed search/scraper tools do not
-authorize a substitute. “Analyze this profile” uses li-read imports/supplied text.
+Discovery retains bounded external search metadata. Never open LinkedIn candidate
+URLs or create relationships automatically. When useful, enrich the strongest named
+subset through permitted non-LinkedIn public sources, retaining identity uncertainty.
+Prefer audited Agent Reach discovery; the current Exa path is disabled. An available
+search-only Codex session tool can supply actual metadata through the local handoff;
+without one, explain the gap. “Analyze this profile” uses li-read imports/supplied
+text; approved APIs and direct automation remain separate capabilities.
 The source-opening instruction below applies to ordinary permitted web research,
 never to DISCOVERY_ONLY LinkedIn candidates.
 

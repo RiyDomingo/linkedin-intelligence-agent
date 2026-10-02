@@ -35,7 +35,7 @@ def row(i=0, **fields):
 class DiscoveryTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory(); self.root=Path(self.tmp.name); self.calls=[]
-        self.rows=[row(i) for i in range(50)]
+        self.rows=[row(i) for i in range(100)]
         def search(r):
             self.calls.append(('index', r['limit']))
             return self.rows[:r['limit']]
@@ -49,7 +49,7 @@ class DiscoveryTests(unittest.TestCase):
         value=req();value['operation']='research_topic'
         result=self.run_discovery(value)
         self.assertEqual(result['decision']['provider'],'agent_reach_discovery')
-        self.assertEqual(result['mode'],'LINKEDIN_DISCOVERY');self.assertEqual(self.calls,[('index',10)])
+        self.assertEqual(result['mode'],'LINKEDIN_DISCOVERY');self.assertEqual(self.calls,[('index',25)])
     def test_supported_natural_prompts(self):
         for text in ('Find people on LinkedIn working on sports biomechanics.',
                      'Find up to 30 LinkedIn profiles relevant to additive manufacturing in sports equipment.',
@@ -66,20 +66,20 @@ class DiscoveryTests(unittest.TestCase):
         value=req();value['operation']='retrieve_linkedin'
         self.assertEqual(self.run_discovery(value)['state'],'LINKEDIN_READER');self.assertEqual(self.calls,[])
     def test_default_cap(self):
-        result=self.run_discovery();self.assertEqual(len(result['candidates']),10)
+        result=self.run_discovery();self.assertEqual(len(result['candidates']),25)
         self.assertEqual(result['limits']['linkedin_page_fetches'],0)
     def test_explicit_cap_and_no_batching(self):
-        result=self.run_discovery(req(limit=100))
-        self.assertEqual(len(result['candidates']),50);self.assertEqual(self.calls,[('index',50)])
+        result=self.run_discovery(req(limit=1000))
+        self.assertEqual(len(result['candidates']),100);self.assertEqual(self.calls,[('index',100)])
         self.assertEqual(result['limits']['queries_used'],1)
     def test_count_in_prompt(self):
         result=self.run_discovery(req('Find up to 30 LinkedIn profiles relevant to biomechanics'))
         self.assertEqual(len(result['candidates']),30)
-        self.assertEqual(request(req('Find 200 LinkedIn profiles'))['limit'],50)
+        self.assertEqual(request(req('Find 200 LinkedIn profiles'))['limit'],100)
     def test_query_budget_validation(self):
-        self.assertEqual(request(req())['query_budget'],1)
+        self.assertEqual(request(req())['query_budget'],3)
         self.assertEqual(request(req(query_budget=5))['query_budget'],5)
-        for value in (0,6,True,1.5,'5'):
+        for value in (0,11,True,1.5,'5'):
             with self.assertRaises(ValueError):request(req(query_budget=value))
     def test_discovery_bounds_not_generic_fields(self):
         with self.assertRaises(ValueError):request({'operation':'local_only','purpose':'LOCAL_WRITING','public_input':True,'limit':10})
@@ -90,16 +90,16 @@ class DiscoveryTests(unittest.TestCase):
         self.assertEqual(result['candidates'],[]);self.assertEqual(result['coverage'],'UNAVAILABLE')
         self.assertEqual(len(self.calls),1)
     def test_oversized_provider_response_fails_closed(self):
-        self.index.retrieve=lambda r:[row(i) for i in range(100)]
+        self.index.retrieve=lambda r:[row(i) for i in range(101)]
         result=self.run_discovery();self.assertEqual(result['state'],'UNAVAILABLE')
         self.assertEqual(result['candidates'],[]);self.assertEqual(len(result['attempts']),1)
     def test_no_fallback_on_any_search_failure(self):
         for reason in ('BLOCKED','TIMEOUT','AUTH_REQUIRED','RATE_LIMIT','PARSE_FAILURE','CAPABILITY_MISMATCH','NETWORK_ERROR'):
             self.calls=[]
-            def fail(r):self.calls.append(('index',10));raise RetrievalFailure(reason)
+            def fail(r):self.calls.append(('index',25));raise RetrievalFailure(reason)
             self.index.retrieve=fail
             result=self.run_discovery();self.assertEqual(result['state'],'UNAVAILABLE')
-            self.assertEqual(self.calls,[('index',10)])
+            self.assertEqual(self.calls,[('index',25)])
             self.assertEqual(result['limits']['queries_used'],1)
     def test_other_tools_cannot_substitute_for_discovery(self):
         self.index.available=False
@@ -109,7 +109,8 @@ class DiscoveryTests(unittest.TestCase):
         result=self.run_discovery()
         self.assertEqual(result['evidence'],[]);self.assertEqual(load(self.root),[])
         self.assertEqual(sentinel.read_text(),'{"people":[]}')
-        self.assertEqual(list(self.root.iterdir()),[sentinel])
+        self.assertEqual(set(self.root.iterdir()),{sentinel,self.root/'discovery'})
+        self.assertFalse((self.root/'read').exists())
     def test_discovery_cannot_be_promoted_by_evidence_ingest(self):
         candidate=self.run_discovery()['candidates'][0]
         with self.assertRaisesRegex(ValueError,'Discovery snippets'):

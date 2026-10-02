@@ -441,17 +441,26 @@ Check provider status:
 
 The verification commands are short test requests; they do not update the bridge's health records. A provider can pass these checks and still show `AVAILABLE_UNVALIDATED`. Ask Codex for a small permitted public research task to exercise the bridge; health then reflects its recorded outcome. Not every provider needs enabling.
 
-### LinkedIn discovery is different from reading a profile
+### Find candidates, then research them on the public web
 
-You can ask “Find people on LinkedIn working on sports biomechanics.” The separate
-discovery workflow is designed for limited external search metadata, with up to 10
-results by default and never more than 50. It does not open or scrape those profiles.
-To analyze profile content, provide an authorized snapshot or paste the information.
+Ask “Find 25 people on LinkedIn working on sports biomechanics.” With an available
+search-only Codex web tool, the agent can find relevant candidate URLs and research
+selected people using permitted public sources. It does not log into LinkedIn or
+scrape those profiles. Search snippets are unverified clues; the agent should explain
+identity uncertainty. To analyze actual LinkedIn content, provide an authorized
+snapshot/export or paste the relevant information.
 
-**The currently audited live search path is unavailable**, because its search tool
-cannot guarantee index-only retrieval. The agent should explain that gap rather
-than use a scraper. This does not prevent basic writing or imported-data review.
-Agent Reach is still optional. See [the discovery status](LINKEDIN_DISCOVERY.md).
+Discovery defaults to 25 candidates, never more than 100 unique candidates per task.
+Normally use 1–3 queries, never more than 10. Public research of the strongest subset
+defaults to 10 people, maximum 20. A private 24-hour metadata cache avoids repeated
+searches; it does not create relationships automatically. Your imported posts,
+connections, comments and analytics have ordinary resource limits, not discovery caps.
+
+**Availability is PARTIAL and session-dependent.** Native search-only handoff is
+validated; the installed Agent Reach Exa content-returning transport remains disabled.
+Without an appropriate session search tool, discovery is unavailable. Agent Reach
+and optional web tooling remain optional for core writing/imports. See [the discovery
+guide](LINKEDIN_DISCOVERY.md) for the handoff and [product limits](POLICY_LIMITS.md).
 
 ### Leave Agent Reach and Bright Data optional
 

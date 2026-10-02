@@ -47,6 +47,7 @@ Private project data is independent of installation:
   sources.json, relationships.json, priorities.json
   imports/      authorized input receipts
   read/         cache.json
+  discovery/    cache.json, validation.json (temporary metadata / receipt)
 ```
 
 ## Dependency graph
@@ -187,18 +188,44 @@ live reachability assertion. See [the current release audit](docs/V1_RELEASE_AUD
 
 ## LinkedIn discovery boundary
 
-See [LinkedIn Discovery Mode](docs/LINKEDIN_DISCOVERY.md) for the focused audit.
-Candidate discovery (`LINKEDIN_DISCOVERY`) is separate from actual content reading
-(`LINKEDIN_READ`, imports only). Only the audited Agent Reach index capability may
-serve discovery; current Exa MCP has no index-only switch, so live discovery stays
-UNAVAILABLE. No scraper, reader proxy or managed fallback may substitute.
+The current [discovery guide](docs/LINKEDIN_DISCOVERY.md) and
+[product limits](docs/POLICY_LIMITS.md) supersede the earlier 10/50 model.
+GREEN authorized imports/local history and ordinary non-LinkedIn research retain
+resource-based limits. AMBER external discovery defaults to 25 candidates, maximum
+100 unique per task, normal 1–3 queries (budget 3), hard maximum 10. Automatic public
+source enrichment defaults to 10 candidates, maximum 20. RED direct scraping and
+account actions remain disabled/zero; approved API is distinct and unavailable.
 
-Discovery results are ephemeral allowlisted search metadata: default 10, maximum
-50, one implemented query per request (budget ceiling 5). They cannot enter the
-ordinary evidence cache or become relationships automatically. LinkedIn page
-fetches, browser visits and scrapes are zero in this workflow. Parsed host guards
-cover LinkedIn subdomains and Jina-wrapped destinations, including redirect stops;
-MCP destination checks occur before server startup. Browser isolation is preserved.
+Discovery is PARTIAL when a search-only Codex session tool supplies actual metadata.
+Agent Reach is preferred where audited; its installed Exa content-returning transport
+remains disabled. Standalone Python does not call native session tools. The local
+`discovery_workflow.py` handoff validates metadata, TTL cache and enrichment receipts;
+it makes no network calls. Ordinary provider routing serves non-LinkedIn sources.
+Identity matches are inferred and claims still require li-fact-check.
 
-Platform rules and index restrictions can change; these limits provide no legal
-advice or compliance guarantee. The historical v1 audit remains unchanged.
+The ignored discovery cache defaults to 24h (accepted 1–72h), maximum 20 active task
+entries. Expired entries are removed on access/write or explicit purge; idle files
+require that command for physical deletion. Full public enrichment content never
+enters this cache. No candidate automatically becomes a relationship/profile fact.
+All existing URL, redirect, isolated-browser and public-input guards remain active.
+The controls do not certify remote vendor egress or external tools outside this pack.
+
+```mermaid
+flowchart TD
+  USER[User] --> ROUTER[Intent router]
+  ROUTER --> LOCAL[Authorized LinkedIn imports and local context]
+  ROUTER --> DISC[External LinkedIn discovery]
+  ROUTER --> WEB[General public research]
+  ROUTER --> API[Approved API: unavailable]
+  ROUTER --> RED[Direct automation: disabled]
+  DISC --> AR[Audited Agent Reach layer / search-only session handoff]
+  AR --> INDEX[External index metadata]
+  INDEX --> CAND[Deduplicate and rank candidates]
+  CAND --> CACHE[24h minimal metadata cache]
+  CAND --> ENRICH[Bounded non-LinkedIn public enrichment]
+  WEB --> ENRICH
+  LOCAL --> INT[Intelligence and claim gate]
+  ENRICH --> INT
+  INT --> DRAFT[Recommendation / draft]
+  DRAFT --> USER
+```

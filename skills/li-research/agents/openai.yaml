@@ -1,6 +1,6 @@
 interface:
   display_name: "li-research"
-  short_description: "Public research and bounded LinkedIn discovery"
-  default_prompt: "Use $li-research to find relevant LinkedIn candidates through external-index discovery without opening their profiles."
+  short_description: "Public research, discovery and enrichment"
+  default_prompt: "Use $li-research to find relevant LinkedIn candidates through external-index discovery, and enrich a bounded subset using non-LinkedIn public sources while preserving identity uncertainty."
 policy:
   allow_implicit_invocation: true

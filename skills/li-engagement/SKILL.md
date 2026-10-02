@@ -10,8 +10,10 @@ Read [the shared contract](../li-context/references/context-contract.md) first.
 For requests to find new people/companies/posts on LinkedIn, apply the discovery
 mode in [li-research](../li-research/SKILL.md) first. Search candidates are clues,
 not relationships or verified profiles; do not open LinkedIn URLs or silently add
-people to relationship memory. Deeper research needs a separate user request,
-identity disambiguation and permitted non-LinkedIn sources or supplied snapshots.
+people to relationship memory. When useful, research the strongest named subset
+through permitted non-LinkedIn public sources (default 10, maximum 20), preserving
+identity uncertainty. Actual LinkedIn content still requires authorized supplied
+snapshots/imports. Explicitly selected deeper public research is a separate task.
 
 Apply [li-read](../li-read/SKILL.md) to available network/public-post/thread data.
 Inspect [attention guidance](../li-brief/references/attention.md), relationship
