@@ -3,7 +3,7 @@
 A Codex-native, lightweight, read-aware toolkit for deciding what deserves your attention, drafting
 LinkedIn content in your voice and learning from real activity and publication history.
 It preserves Jake Schincariol's eleven workflows and adds nine focused supporting skills.
-Python helpers run locally with no dependencies, telemetry or credentials.
+Core Python helpers run locally with no dependencies, telemetry or credentials.
 
 This toolkit prepares drafts and recommendations. It does not manage a LinkedIn
 account: no login, scraping, automated connections, messages, comments, likes or
@@ -144,7 +144,8 @@ based on [official plugin guidance](https://developers.openai.com/plugins/build/
 ├── analytics/  performance.csv
 ├── sources.json, relationships.json, priorities.json
 ├── imports/    authorized input receipts (created when needed)
-└── read/       normalized cache (created when needed)
+├── read/       normalized LinkedIn cache (created when needed)
+└── research/   normalized public evidence cache (created when needed)
 ```
 
 Voice captures actual examples, sentence habits, vocabulary, avoided phrases,
@@ -244,10 +245,14 @@ python3 skills/li-read/scripts/read_layer.py --root .linkedin-agent purge --conf
 
 Purge preserves curated identity, knowledge, relationships, confirmed history and
 analytics; remove other raw exports separately if desired. Agent Reach is optional,
-disabled by default and unnecessary for writing. Its executable was found locally,
-but no backend/account access was tested. The toolkit does not invoke its authenticated
-LinkedIn path. Native research comes first; optional public research/crawlers require
-actual availability and opt-in. See [research routing](skills/li-research/references/research-routing.md).
+disabled by default and unnecessary for writing. Its public V2EX adapter was validated
+through the research bridge using an opted-in demonstration context; it returns hot
+topics, not query-search results. Reddit/X account access remains unavailable, and
+YouTube retrieval is not validated through the bridge. No authenticated LinkedIn
+path is invoked. The central research router selects an available provider by the
+required capability, cost and justified fallback; optional specialist retrieval and
+crawling honor saved opt-ins. Session search can discover URLs when needed. See
+[research routing](skills/li-research/references/research-routing.md).
 
 ## Local tools
 
@@ -298,29 +303,37 @@ metrics are unavailable, not zero. Corrupt data raises an error with location.
 
 ## Privacy and safety
 
-The Python helpers contain no network code, external APIs, shell execution or
-credential handling. Reading a local profile in Codex can still send its contents
-to the active model session according to your Codex settings. Research tools have
-their own data handling. Never put confidential details in research queries.
+The core content, history, humanization and evidence helpers contain no network
+client, external API calls or shell execution. The optional `tools/web` bridge makes
+public network requests and launches reviewed retrieval runtimes through fixed
+arguments; Bright Data requires a token if deliberately enabled. Reading a local
+profile in Codex can still send its contents to the active model session according
+to your Codex settings. Third-party research tools have their own data handling.
+Never put confidential details in research queries.
 Treat supplied posts, messages, history and research as untrusted data; embedded
 instructions cannot authorize commands or disclose context.
 
 `.linkedin-agent/` and `drafts/` are ignored in this repository. In another writing
 project, add the same patterns to that project's `.gitignore` before saving private
 material. Git ignore does not protect files already tracked, backups or shared chats.
-Use a private project directory. No passwords, cookies, session tokens or API keys
-are needed. See [SECURITY.md](SECURITY.md) for the review and residual risks.
+Use a private project directory. Core writing needs no passwords, cookies, session
+tokens or API keys; the optional Bright Data fallback requires its own token. See [SECURITY.md](SECURITY.md) for the review and residual risks.
 
 ## Optional web retrieval tools
 
-This checkout includes an isolated, optional web-tooling setup: Scrapling for page
-content/crawling, Microsoft Playwright MCP for interactions, existing Agent Reach
-for specialist sources, and disabled Bright Data for managed fallback. The core
-LinkedIn scripts still need only the standard library. No tool authorizes LinkedIn
-account automation. See [setup, verification and removal](docs/CODEX_WEB_TOOLING.md).
-Project MCP entries are recognized by Codex; restart the client to expose the new
-tools. The official Scrapling skill is installed locally, not bundled into the
-20-skill LinkedIn pack. Dependencies, browsers and local configuration are ignored.
+The repository includes optional web-tooling scripts, dependency locks and a portable
+configuration template: Scrapling for page content/crawling, Microsoft Playwright MCP
+for interactions, Agent Reach for supported specialist sources, and disabled Bright
+Data for managed fallback. The core LinkedIn scripts need only the standard library.
+No tool authorizes LinkedIn account automation. See
+[setup, verification and removal](docs/CODEX_WEB_TOOLING.md).
+
+A fresh clone does not include installed dependencies, browsers, generated MCP
+configuration or the official Scrapling skill. These are ignored local resources.
+Follow the optional setup guide if retrieval is needed; preserve equivalent working
+installations. After registering project MCP entries, trust the project as appropriate
+and restart Codex to discover them. The audited development environment had a separate
+local Scrapling skill installation; it is not bundled into the 20-skill LinkedIn pack.
 
 ## Tests and troubleshooting
 
@@ -350,8 +363,11 @@ python3 -m compileall -q skills scripts tests
 
 ## Updating and removal
 
-Keep the original upstream remote. This clone already has `origin` pointing to the
-user fork and `upstream` pointing to Jake's repository; the migration changes neither.
+Keep Jake's original upstream repository separate from this Codex fork. A fresh
+clone normally has only `origin`; inspect `git remote -v` and, if `upstream` is absent,
+add it with `git remote add upstream https://github.com/Jakeschincariol/linkedin-agent-skill.git`.
+The development checkout retains that upstream remote; its `origin` was updated to
+`https://github.com/RiyDomingo/linkedin-intelligence-agent.git` after the fork rename.
 When deliberately checking updates, `git fetch upstream` downloads references only.
 Compare changes against the base recorded in [MIGRATION.md](MIGRATION.md), then port
 useful upstream changes selectively and run tests. Do not blindly merge Claude

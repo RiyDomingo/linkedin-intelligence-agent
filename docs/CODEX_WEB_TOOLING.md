@@ -3,7 +3,10 @@
 Audited and configured on 2026-10-02. This is an optional developer/agent layer;
 core content/history/humanization scripts remain standard-library-only. No web
 server, Docker stack, application retrieval API or LinkedIn client was added.
-The existing uncommitted migration work and user MCP registry were preserved.
+The existing migration work and user MCP registry were preserved during setup.
+Version and installation observations below describe the audited development machine,
+not a fresh clone. The repository includes setup scripts and locks; installed runtimes,
+browsers, generated configuration and the separate Scrapling skill are ignored.
 
 ## Audit and component roles
 
@@ -76,7 +79,8 @@ Codex/the desktop client and check `/mcp`. Registration was validated with
 Install the official skill with the available Skill Installer helper, or copy
 `agent-skill/Scrapling-Skill` from the pinned official repository commit
 `971d5edb9c01f000dd4befcd21742e9b22260dc7` into `.agents/skills/scrapling-official`.
-Keep its LICENSE.txt and references. This checkout has that copy installed and ignored.
+Keep its LICENSE.txt and references. That copy was installed and ignored in the
+audited development checkout; a fresh clone does not include it.
 Do not use its blanket `all`/`install --force` instructions over this pinned setup.
 The skill is available on the next turn; restart if discovery is delayed.
 
