@@ -1,0 +1,176 @@
+# LinkedIn Intelligence Agent architecture
+
+Twenty focused skill entrypoints use progressive loading. Name/description route
+the request; SKILL.md loads relevant references only. Installed skills are siblings;
+shared resources stay inside the pack so installed copies need no repository-root
+resources. Composition means applying sibling instructions, not an invented skill-call
+API, recursive invocation or automatic agent spawning.
+
+## Files and layers
+
+```text
+plugin.json                         portable distribution identity
+skills/
+  li-{post,comment,reply,profile,plan,human,carousel,repurpose,dm,inbox,audit}/
+  li-{context,fact-check,research,history,ideas,read,brief,engagement,weekly}/
+    SKILL.md                        focused workflow
+    agents/openai.yaml              implicit invocation and UI metadata
+  li-post/references/hooks.json      21 editorial options
+  li-profile/references/rubric.json  12 criteria / 100 points
+  li-human/scripts/                  humanize.py, detect.py
+  li-human/references/slop.json      normalization and structural preferences
+  li-context/references/             shared context/trust/approval contract
+  li-context/templates/              14 starter files
+  li-context/scripts/context.py      initialization/status/publication history
+  li-read/scripts/models.py          normalized schema, provenance, freshness
+  li-read/scripts/read_layer.py      local providers, routing, cache, import/purge
+  li-read/scripts/intelligence.py    attention, weekly review, combined memory
+  li-read/references/                source and normalization contract
+  li-read/assets/                    fictional read example
+  li-brief/references/               attention and relationship guidance
+  li-fact-check/references/          claim classification/permission gate
+  li-research/references/            optional source/tool routing
+  li-history/references/             confirmed publication schema
+templates/                          voice convenience copy, publication example
+scripts/                            complete-pack installer, disposable demo
+tests/                              original toolkit and intelligence tests
+```
+
+Private project data is independent of installation:
+
+```text
+.linkedin-agent/
+  identity/     voice.md, bio.md, audience.md
+  knowledge/    companies.md, projects.md, claims.md, metrics.md
+  history/      posts.jsonl, comments.jsonl, topics.json
+  analytics/    performance.csv
+  sources.json, relationships.json, priorities.json
+  imports/      authorized input receipts
+  read/         cache.json
+```
+
+## Dependency graph
+
+```mermaid
+flowchart TD
+  BRIEF[li-brief] --> READ[li-read]
+  BRIEF --> ENG[li-engagement]
+  BRIEF --> IDEAS[li-ideas]
+  BRIEF --> WRITE[post / comment / reply / dm]
+  WEEK[li-weekly] --> READ
+  WEEK --> AUDIT[li-audit]
+  ENG --> READ
+  ENG --> HIST[li-history]
+  PLAN[li-plan] --> IDEAS
+  PLAN --> AUDIT
+  REP[li-repurpose] --> POST[li-post]
+  POST --> HIST
+  IDEAS --> HIST
+  WRITE --> FACT[li-fact-check]
+  POST --> FACT
+  WRITE --> HUMAN[li-human]
+  POST --> HUMAN
+  FACT --> RESEARCH[li-research]
+  IDEAS --> RESEARCH
+  ALL[all workflows] --> CTX[li-context contract]
+```
+
+Results can feed later workflows without recursively invoking their entrypoints.
+The shared contract links read guidance for relevant context retrieval; this is a
+resource reference, not an instruction to re-enter the daily-brief pipeline.
+
+## Data flows
+
+Writing: user idea → relevant context and available read evidence → identify claims
+→ minimal research when necessary → combined history overlap → flexible structure
+→ voice-aware draft → factuality/public-permission gate → quality edits → recheck
+changed claims → human review → manual publication → separately confirmed history.
+
+Intelligence: capability check → authorized source receipts → normalized data with
+provenance → incremental cache/freshness → relationship and priority context →
+transparent attention classification → Codex semantic review → 0–5 useful actions
+and grounded drafts → human execution. Weekly review separates observed activity
+from confirmed publication and presents experiments, not causal success claims.
+
+## Read layer
+
+`ReadProvider.read(capability)` is a read-only protocol. The included FileProvider
+reads configured imports; no remote account client is bundled. Source-type labels
+represent receipts, not account access. Routing prioritizes supported integration
+receipts, exports, public retrieval, supplied material, then optional connectors;
+errors, partial and stale coverage trigger fallback. Capability status distinguishes
+absence from explicitly complete empty results and preserves failed refresh notes.
+
+Allowlisted profile/post/comment/person/analytics/message/research models preserve
+unknown fields as null and drop opaque raw data. Provenance retains source/provider,
+identifier, retrieval time, optional URL/confidence and visibility. Assessments and
+recommendations are separate from source facts. WEB-VERIFIED is an operator/agent
+attestation after source review, never Python proof of truth.
+
+Cache keys include provider/kind/capability/id; canonical hashes detect changes.
+Newer complete snapshots retire absent records; partial snapshots never do. Old
+snapshots cannot overwrite or revive newer state. Active records serve current
+attention; retired own-post observations can still support content memory. A refresh
+never silently writes confirmed publication history or public claims.
+
+Freshness defaults vary by kind; undated/future activity cannot generate timely
+recommendations. Mode reflects supplied evidence coverage; no mode implies a tested
+live account connection. Purge previews and deletes only imported receipts/cache.
+
+## Deterministic versus semantic work
+
+Humanization protects URL/email spans, preserves case and meaningful Unicode, and
+applies longest-first vocabulary rules. Existing output is refused. The analyzer
+reports observable style patterns with voice/evidence unmeasured; no human score.
+
+`context.py` adds missing templates, validates history, appends only attested actual
+publications, locks Unix append writers and joins descriptive metrics by ID. Token
+overlap is transparent; Codex decides whether new evidence/angles are distinctive.
+
+`intelligence.py` combines confirmed history and observed own posts without promoting
+observations to confirmed logs. It selects known own-thread questions, relevant
+contributions and explicit curated obligations, suppressing resolved/repetitive/stale
+activity. Its numeric ordering is inferred. It cannot infer genuine expertise,
+relationship importance, factual validity or opportunity probability from nothing.
+CLI draft fields are placeholders; li-brief applies the original writing skills to
+produce actual drafts from available evidence. Strategic metrics are used only when
+provided; impressions alone do not define success.
+
+## Security boundaries
+
+Python is local, standard-library-only: no network, credentials, subprocess or
+executable data. Session tools are a separate optional research boundary and receive
+minimal public queries. There are no LinkedIn write methods or browser account flows.
+Human approval never triggers an account action.
+
+Data paths reject traversal/interior symlinks. New cache files/directories have private
+Unix permissions; private imports require opt-in and default brief/show omit them.
+One cache writer at a time is required. Parent races, resource exhaustion, undetected
+secrets in valid text and model disclosure remain trusted-workspace risks; see
+SECURITY.md. Prompt gates require agent/human judgment and cannot certify truth or
+prevent a user copying an unresolved draft.
+
+## Optional developer web stack
+
+The core pack above remains dependency-free. tools/web adds a separate pinned uv/npm
+retrieval environment and fixed stdio launchers, registered in generated local
+.codex/config.toml. Scrapling is primary content retrieval; Playwright handles
+interaction; Agent Reach stays specialist; Bright Data is a disabled managed
+fallback. See docs/CODEX_WEB_TOOLING.md. This optional layer can network and launch
+reviewed dependencies; it does not alter core helper behavior or grant LinkedIn
+account actions. Project routing lives in AGENTS.md, and installed pack research
+references retain graceful operation without optional tools.
+
+## Unified orchestration
+
+Intent → focused intelligence skill → local context/history + separate li-read →
+explicit public research need → li-research capability router → one retrieval
+provider → normalized evidence/cache → relevant inferred signals → claim and public
+permission gate → reasoning, history/voice/quality → human-ready output.
+
+`skills/li-research/scripts/orchestrator.py` owns selection and bounded sequential
+execution; `evidence.py` owns models, hash/URL/platform deduplication, task freshness
+and assessments. `tools/web/research.py` connects installed optional providers.
+Provider health never grants LinkedIn access. Daily brief returns research_signals
+separately from supported LinkedIn actions; semantic ranking stays with Codex.
+See docs/ORCHESTRATION.md for the complete request and evidence contract.

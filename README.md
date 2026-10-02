@@ -1,177 +1,373 @@
-# The LinkedIn agent skill
+# LinkedIn Intelligence Agent
 
-Eleven Claude skills that run a LinkedIn account. Free, MIT, no signup, no API
-key, nothing to connect.
+A Codex-native, lightweight, read-aware toolkit for deciding what deserves your attention, drafting
+LinkedIn content in your voice and learning from real activity and publication history.
+It preserves Jake Schincariol's eleven workflows and adds nine focused supporting skills.
+Python helpers run locally with no dependencies, telemetry or credentials.
 
-One of them writes your posts off 21 hook formulas. One comments on other
-people's posts. One handles the replies under yours. One scores your profile
-out of 100 and rewrites what lost points. One plans the week: what to post,
-when, and who to engage with.
+This toolkit prepares drafts and recommendations. It does not manage a LinkedIn
+account: no login, scraping, automated connections, messages, comments, likes or
+publication. A human reviews and publishes manually. It never invents metrics,
+clients, credentials, partnerships, dates, quotations, results or product efficacy.
 
-And one is the humanizer, which is the reason the rest are usable. It strips
-the em dashes, the slop vocabulary and the invisible watermark characters out
-of a draft, then scores what is left against a five-check detection panel
-before you ever see it.
+Compared with the upstream Claude version, this edition uses Codex skill metadata,
+project-local context, JSONL memory and explicit evidence/permission checks. It
+replaces the “human score” with observable writing diagnostics. They are local
+heuristics, not proof of authorship, and provide no AI-detector avoidance guarantee.
+No GPTZero, Turnitin, Originality, Copyleaks or similar services are called.
 
-**Nothing gets posted until you say yes.** These skills write. You post.
+## Everyday requests
 
-## Install
+Ask naturally; Codex selects the focused workflow and retrieves only missing context:
 
-Paste this into Claude:
+> Review my LinkedIn and tell me what deserves attention today.
+>
+> Find a strong post opportunity or a fresh angle I have not already posted about.
+>
+> Research this topic before drafting a post. Check whether this claim is accurate.
+>
+> Find discussions relevant to my work. Who should I engage with today?
+>
+> Rewrite this LinkedIn post in my voice.
 
+The last request normally needs no external retrieval. The daily review uses the
+separate LinkedIn reader and local memory; without authorized imports it reports
+missing coverage instead of inventing activity. Relevant external evidence supports
+recommendations but does not automatically become a post.
+
+A central capability router handles optional public research, normalized evidence,
+provenance, freshness and bounded fallback. You do not need to pick infrastructure.
+See [unified orchestration](docs/ORCHESTRATION.md) for the actual capability matrix,
+health command, examples and limitations. Installed third-party retrieval tools
+have their own dependencies; the core content helpers remain standard-library-only.
+
+Repository: [RiyDomingo/linkedin-intelligence-agent](https://github.com/RiyDomingo/linkedin-intelligence-agent).
+The existing local checkout folder may still be named `linkedin-agent-skill`;
+that does not affect the project name or installation. `.linkedin-agent/` remains
+the compatible data directory.
+
+## Quick start
+
+You need a local Codex installation with skills and file/shell access, and Python
+3.10 or later. Research is optional and uses whatever research tools are available
+in the session. Core writing requires no API key or LinkedIn credentials. Check:
+
+```sh
+python3 --version
 ```
-https://github.com/Jakeschincariol/linkedin-agent-skill
 
-Install this skill, then confirm /li-post works.
+Run the following from this cloned repository. Set the installation destination
+to the project where you will write LinkedIn content; the example installs here:
+
+```sh
+python3 scripts/install_skills.py --dest .agents/skills
+python3 skills/li-context/scripts/context.py --root .linkedin-agent init
+python3 skills/li-context/scripts/context.py --root .linkedin-agent status
 ```
 
-Or do it yourself, in Claude Code:
+The installer copies all twenty skills and attribution files. It refuses existing
+skill folders, even if they match, so it cannot overwrite another installation.
+Install the whole pack: sibling resources are required. Start a new Codex chat in
+this project, or restart Codex if skills do not appear. Ask:
 
-```bash
-git clone https://github.com/Jakeschincariol/linkedin-agent-skill.git
-cp -r linkedin-agent-skill/skills/li-* ~/.claude/skills/
+> Use $li-context to help set up my LinkedIn voice from these three writing samples.
+
+Then fill the public facts, audience, claims and metrics templates. Unfilled fields
+remain placeholders. “Complete” in `status` means files exist and template tokens
+are filled; it does not certify that the facts are true or permission is valid.
+
+For user-wide use, the documented discovery location is `~/.agents/skills`:
+
+```sh
+python3 scripts/install_skills.py --dest "$HOME/.agents/skills"
 ```
 
-Or as a plugin:
+This is optional; no global installation or configuration change is performed by
+cloning this repository. Even user-wide skills read context from the active project.
+The current environment also exposes legacy/user skills under `~/.codex/skills`;
+new installations here use the documented `.agents/skills` location.
 
-```
-/plugin marketplace add Jakeschincariol/linkedin-agent-skill
-/plugin install linkedin-agent
-```
+## Discovery and invocation
 
-Project-local instead of global: copy the same folders into your repo's
-`.claude/skills/`. No Claude Code at all? Paste any single `SKILL.md` at the
-top of a chat and it runs as a mode - you lose the two Python tools, which is
-most of the point of `/li-human`, but the rest works.
+Codex loads skill names/descriptions first and selects relevant skills automatically.
+For example, “Draft a LinkedIn post about what our review checklist missed” can
+select `li-post`. Explicit `$li-post` also works in Codex; the CLI and IDE expose
+`/skills` or `$` selection. `/li-post` is not a command supplied by this project.
+Descriptions and `agents/openai.yaml` keep implicit invocation enabled. Selection
+is model behavior, not a deterministic router; confirm the selected skill in a new
+chat if several overlapping packs are installed.
 
-Then spend ten minutes on `templates/voice.md`. Copy it to
-`~/.claude/linkedin/voice.md` and fill it in, or paste three of your own posts
-into Claude and say "write my voice.md from these". Every skill reads that
-file. Skip it and everything comes out sounding like everyone else.
+Codex scans `.agents/skills` from the working directory up to the repository root,
+and user skills in `~/.agents/skills`. A bare `skills/` directory is a distribution
+source, not a standalone discovery location. Supported symlinks are unnecessary
+for this installer. See the verified [official skill documentation](https://learn.chatgpt.com/docs/build-skills).
 
-## The eleven
+The root `plugin.json` uses the current portable Agent Plugins format with skills
+under `skills/`. It has no MCP server, lifecycle hooks or invented configuration.
+The package can be used in a supported plugin authoring/distribution flow; no public
+marketplace listing or installation through the directory has been performed.
+For immediate local use, follow the tested copy installation above. Packaging is
+based on [official plugin guidance](https://developers.openai.com/plugins/build/plugins).
 
-| command | what it does |
+## Available skills
+
+| Skill | Purpose |
 | --- | --- |
-| `/li-post` | One idea into a post. Three hook options from [21 formulas](skills/li-post/hooks.json), one full draft, humanized before you see it. |
-| `/li-comment` | Comments on other people's posts. Nine types, picked by what the post actually is. Never "Great post!". |
-| `/li-reply` | The thread under your own post. Sorts every comment into lead / substance / peer / support / noise, then writes in that order. |
-| `/li-profile` | Scores your profile against a [12-part rubric](skills/li-profile/rubric.json) out of 100, then rewrites in fix-first order. |
-| `/li-plan` | The week. What to post, when to post it, and the 10 people to engage with. Writes `~/.claude/linkedin/plan.md`. |
-| `/li-human` | The humanizer. Two scripts that actually run. See below. |
-| `/li-carousel` | Document posts. Slide-by-slide copy, the cover that earns the swipe, and the PDF to upload. |
-| `/li-repurpose` | One video, newsletter or transcript into a week of posts that each stand alone. |
-| `/li-dm` | The 200-character invite note, the first message, and the two follow-ups. Two. |
-| `/li-inbox` | Triages the inbox into lead / recruiter / peer / ask / spam, and tells you which tell gave the sequence away. |
-| `/li-audit` | Post-mortem on what you have already published. Ranks by engagement rate and reach multiple, not impressions. |
+| `li-post` | Draft a feed post with context, evidence, history and style review. |
+| `li-comment` | Offer thoughtful comments on supplied posts. |
+| `li-reply` | Triage comments under your own post and draft replies. |
+| `li-profile` | Assess supplied profile sections and rewrite weak sections. |
+| `li-plan` | Build a realistic content calendar and manual engagement plan. |
+| `li-human` | Clean style locally and inspect writing diagnostics. |
+| `li-carousel` | Write document-post slides; export when suitable tools exist. |
+| `li-repurpose` | Extract distinct standalone angles from a long source asset. |
+| `li-dm` | Draft connection notes, messages and respectful follow-ups. |
+| `li-inbox` | Triage supplied private messages and draft worthwhile replies. |
+| `li-audit` | Analyze actual publication metrics and suggest experiments. |
+| `li-context` | Set up voice, audience, public facts, claims and metrics. |
+| `li-fact-check` | Classify claims and check both evidence and public permission. |
+| `li-research` | Gather only external evidence needed for a draft. |
+| `li-history` | Check overlap and record confirmed publication. |
+| `li-ideas` | Generate grounded ideas from real work and prior content. |
+| `li-read` | Normalize authorized snapshots, check capabilities and freshness. |
+| `li-brief` | Select 0–5 worthwhile actions today and prepare grounded drafts. |
+| `li-engagement` | Prioritize substantive conversations and relationship follow-ups. |
+| `li-weekly` | Review strategic signals, repetition and next-week hypotheses. |
 
-## The humanizer
+## Your local data
 
-`/li-human` ships two Python scripts with no dependencies. They run on your
-machine, on your text, and nothing is uploaded.
-
-```bash
-python3 humanize.py draft.txt --report      # clean it, show every change
-python3 detect.py draft.txt                  # score it, five checks
-python3 detect.py before.txt after.txt       # prove the delta
+```text
+.linkedin-agent/
+├── identity/   voice.md, bio.md, audience.md
+├── knowledge/  companies.md, projects.md, claims.md, metrics.md
+├── history/    posts.jsonl, comments.jsonl, topics.json
+├── analytics/  performance.csv
+├── sources.json, relationships.json, priorities.json
+├── imports/    authorized input receipts (created when needed)
+└── read/       normalized cache (created when needed)
 ```
 
-**What comes out automatically:**
+Voice captures actual examples, sentence habits, vocabulary, avoided phrases,
+contractions, humour, profanity, emoji, tone and formatting. Examples show style;
+they do not authorize reusing old claims as current facts. Bio stores approved
+professional facts. Audience identifies readers and their problems/timezones.
+Companies/projects record actual relationships and public milestones.
 
-- **Invisible characters.** Zero-width spaces and joiners, word joiners, soft
-  hyphens, byte-order marks, Unicode tag characters, non-breaking and narrow
-  spaces. Your keyboard does not make these. They survive copy-paste and they
-  are invisible in every editor you own.
-- **Typography.** Em dash to comma, en dash to hyphen, curly quotes to
-  straight, ellipsis to three dots.
-- **The lexicon.** 113 stock words and phrases with plain-English
-  replacements - delve, leverage, robust, seamless, crucial, testament to, "in
-  today's fast-paced world", "let that sink in" - with capitalisation preserved
-  and URLs untouched. It lives in
-  [`slop.json`](skills/li-human/slop.json) and it is meant to be edited.
+Claims record exact statements, status, evidence, qualification, date and permission.
+A verified but confidential fact cannot be published. Metrics record real values,
+units, periods, definitions and public permission. Missing values stay placeholders.
+Do not store secrets just to tell the agent not to publish them; record a generic
+restriction instead. You can explicitly mark optional sections as not applicable.
+`init` adds missing templates without replacing your work.
 
-**What gets flagged instead of fixed:** "It's not just X, it's Y", rule-of-three
-triads, one-word rhetorical questions, hashtag walls, reflex engagement bait,
-uniform sentence length. Changing the shape of a sentence needs judgement, so
-those are handed back for a rewrite rather than mangled by a regex.
+## Examples
 
-**The five checks**, scored 0-100, higher is more human:
+- “Draft a LinkedIn post about the dependency our checklist missed. Here is what happened…”
+- “Comment on this post with a practical counterexample; use only the experience I supplied.”
+- “Generate ideas from the recent project notes and flag overlap with prior posts.”
+- “Review this draft's product claims. Leave unsupported numbers as placeholders.”
+- “Repurpose this transcript into three distinct angles and attribute the speaker's experience.”
+- “I published the final draft on 2026-10-02. Record it in history.”
 
-| check | what it measures |
-| --- | --- |
-| BURSTINESS | sentence-length variation. Models write even. |
-| SPECIFICITY | numbers, names and concrete markers per 100 words |
-| SLOP DENSITY | lexicon hits per 100 words |
-| FINGERPRINT | invisible characters, em dashes, curly quotes per 1,000 |
-| VOICE | contractions, person, structural tells |
+Content goes through relevant context, claim identification, research when necessary,
+history review, drafting, factuality and quality checks. Copy-ready text is separate
+from claim notes. Unresolved drafts are marked DRAFT — NEEDS VERIFICATION. Draft
+approval is not publication confirmation, and no approval triggers a LinkedIn action.
 
-The verdict weights the mean at 60% and the **weakest single check** at 40%,
-because a detector only needs one signal to fire.
+## Read-aware onboarding and daily use
 
-Run against a deliberately terrible draft:
+Start with your writing voice, public professional facts and audience. Then supply
+only the information needed for your first task: a recent post and its comments,
+a user-owned export, or public material obtained through a permitted session tool.
+`li-context` helps progressively; missing data does not block basic writing.
+Relationships record why someone matters, actual prior interactions and explicit
+reply obligations. Priorities record real topics/projects. Do not infer sensitive
+personal attributes or fabricate a relationship from a name match.
 
-```
-  BURSTINESS    ##################......  73.0
-  SPECIFICITY   ######################## 100.0
-  SLOP DENSITY  ........................   0.0    19 stock terms, 24.1 per 100 words
-  FINGERPRINT   ........................   0.0    1 invisible, 1 em dash, 3 curly quote
-  VOICE         ########................  33.3    3 structural tells
-  ------------------------------------------------------------
-  HUMAN SCORE   ######..................  24.8   FLAGGED
-```
+The default installation has **Manual Mode** and no connected LinkedIn account.
+The implemented provider reads local snapshots. No live LinkedIn API client is
+bundled. Official integration, connector and public-source labels represent receipts
+from access actually available to the operator/session; a config label cannot grant
+access. User exports and pasted material are supported immediately. Authorized public
+research is conditional on the session's tools and permissions.
 
-After `humanize.py`, with the flagged structures still unrewritten:
+The status CLI distinguishes unavailable, partial, stale and available data. Manual
+Mode uses supplied/export/history data. Partial Read Mode has external read receipts.
+Rich Read-Aware Mode additionally has usable profile, own-post, own-comment and
+network coverage. These describe evidence coverage, **not a tested live connection**;
+`live_account_client` is false. Empty, complete receipts differ from absent access.
 
-```
-  HUMAN SCORE   #################.......  69.7   REVIEW    (+44.9)
-```
-
-The last stretch to PASS is the part the script deliberately leaves to you.
-
-## The fine print, which is the honest part
-
-**These skills do not post to LinkedIn, and they should not.** There is no
-official API for posting to a personal profile without an approved partner
-app, and automating the site with a browser or a third-party tool violates
-[LinkedIn's User Agreement](https://www.linkedin.com/legal/user-agreement) and
-gets accounts restricted. So every skill here ends the same way: a copy-ready
-block, and you paste it. That is not a limitation bolted on afterwards, it is
-the design. It is also why the approval gate is real rather than a setting.
-
-**The five checks are local heuristics, not detector APIs.** They are modelled
-on the signals public detectors key on, and they run entirely on your machine.
-They are not GPTZero, Originality, Copyleaks, Winston or Turnitin, they do not
-call those services, and they cannot promise those verdicts. Fixing what they
-measure tends to move those numbers, because they are measuring the same
-underlying things. That is the whole claim. Nobody can honestly sell you
-"undetectable", and anybody who does is selling you something.
-
-**The invisible-character pass is real and it is narrow.** It removes the
-zero-width and format characters that end up in generated text and survive a
-copy-paste. That is a genuine, checkable fingerprint. It is not a claim about
-defeating a cryptographic watermarking scheme, and this repo does not make
-one.
-
-**Nothing here fabricates.** No invented metrics, clients or outcomes go under
-your name. If a draft needs a number you have not given, it comes back with
-`{{your number}}` in it and a flag, every time.
-
-## Files
-
-```
-skills/li-post/hooks.json        21 hook formulas: template, example, what it is for, how it gets ruined
-skills/li-human/slop.json        the lexicon: 113 terms, 17 invisible classes, 11 structural tells
-skills/li-human/humanize.py      the three cleaning passes
-skills/li-human/detect.py        the five-check panel
-skills/li-profile/rubric.json    the 100-point profile score
-templates/voice.md               your voice profile. Fill this in first.
+```sh
+python3 skills/li-read/scripts/read_layer.py --root .linkedin-agent status
+python3 skills/li-read/scripts/read_layer.py --root .linkedin-agent import supplied.json
+python3 skills/li-read/scripts/read_layer.py --root .linkedin-agent refresh
+python3 skills/li-read/scripts/intelligence.py --root .linkedin-agent brief
+python3 skills/li-read/scripts/intelligence.py --root .linkedin-agent weekly
 ```
 
-## Credit
+Create a reviewed envelope following [the read contract](skills/li-read/references/read-contract.md).
+It documents all fields, CSV mapping, provenance and configuration. Direct import
+stores normalized data; configured `sources.json` files support repeatable refresh
+and priority/fallback. Complete newer snapshots retire absent records; partial
+snapshots do not imply deletion. Older receipts cannot replace newer state.
 
-Made by Jake Schincariol, [opusjake.ai](https://opusjake.ai).
-The full write-up is at [opusjake.ai/r/linkedin-agent](https://opusjake.ai/r/linkedin-agent).
+Ask Codex: “What deserves my attention on LinkedIn today?” `li-brief` reviews available
+sources, suppresses stale/low-value activity and prepares 0–5 recommendations with
+reasons, dates, relationship context and drafts. Python ranks annotated candidates;
+Codex supplies the semantic review and final writing through the existing skills.
+“Nothing material found in available data” is a valid result. No response is drafted
+merely to create activity. You review and perform every LinkedIn action yourself.
 
-## License
+For weekly review, ask: “What worked, what repeated, and what should I try next week?”
+The system separates confirmed publications from imported observations, uses saves,
+meaningful comments, relevant-person engagement and opportunities when supplied,
+and treats recommendations as hypotheses rather than proven causality. Unknown
+metrics stay unknown. [The fictional daily example](EXAMPLE_BRIEF.md) is reproducible:
 
-MIT. Take it, change it, ship it.
+```sh
+python3 scripts/demo_brief.py
+```
+
+Imports can contain private data. Message records always require `--allow-private`,
+even if visibility is missing. Providers require `allow_private: true`; default show
+and brief omit private read items, and brief needs `--include-private` to include
+them. Record only material you are authorized to retain. New cache files use private
+permissions on Unix. Sources retain identifiers, timestamps, confidence and labels;
+annotations/recommendations remain explicitly user-provided or inferred.
+
+```sh
+python3 skills/li-read/scripts/read_layer.py --root .linkedin-agent tools
+python3 skills/li-read/scripts/read_layer.py --root .linkedin-agent purge
+# After reviewing the preview, deliberately remove imported receipts/cache:
+python3 skills/li-read/scripts/read_layer.py --root .linkedin-agent purge --confirm-import-purge
+```
+
+Purge preserves curated identity, knowledge, relationships, confirmed history and
+analytics; remove other raw exports separately if desired. Agent Reach is optional,
+disabled by default and unnecessary for writing. Its executable was found locally,
+but no backend/account access was tested. The toolkit does not invoke its authenticated
+LinkedIn path. Native research comes first; optional public research/crawlers require
+actual availability and opt-in. See [research routing](skills/li-research/references/research-routing.md).
+
+## Local tools
+
+From the repository (use installed absolute skill paths when working elsewhere):
+
+```sh
+python3 skills/li-human/scripts/humanize.py draft.txt --json
+python3 skills/li-human/scripts/humanize.py draft.txt -o clean.txt --report
+python3 skills/li-human/scripts/detect.py draft.txt clean.txt --json
+```
+
+Input `-` reads stdin. Normalization preserves URLs/emails and capitalization,
+uses longest-first word/phrase rules and reports structural patterns for review.
+It preserves meaningful Unicode joiners/direction marks and subdivision flag emoji
+by default. Optional
+`--aggressive-invisibles` can damage orthography or emoji; review deliberately.
+`--no-lexical` and `--no-typography` preserve voice preferences. Output defaults to
+stdout. `-o` requires a new file; existing paths/symlinks are refused. `--json` and
+`-o` cannot be combined. Reports use stderr; invalid input exits 2.
+
+The quality panel measures sentence variation, generic-language matches, formatting,
+repeated sentences/patterns and numeric markers. Numbers do not prove specificity
+or factual accuracy. Voice consistency and evidence density require agent/human
+review and are labelled unmeasured. Successful analysis exits 0 regardless of style.
+There is no score to optimize, authorship verdict or pass threshold.
+
+History commands return JSON:
+
+```sh
+python3 skills/li-context/scripts/context.py --root .linkedin-agent load
+python3 skills/li-context/scripts/context.py --root .linkedin-agent check candidate.json
+python3 skills/li-context/scripts/context.py --root .linkedin-agent summary
+python3 skills/li-read/scripts/intelligence.py --root .linkedin-agent lookup "review checklist"
+python3 skills/li-read/scripts/intelligence.py --root .linkedin-agent overlap candidate.json
+python3 skills/li-context/scripts/context.py --root .linkedin-agent append published.json --published
+```
+
+A candidate can be `{"topic":"proposal review","angle":"pricing clarity","hook":"Price changed the discussion."}`.
+Copy `templates/published-post.json` to a new local file and replace its placeholders,
+ID and date with the actual published content before appending. Do not log drafts.
+`--kind comments` records confirmed public comments using the same schema. See
+[the history schema](skills/li-history/references/history-schema.md) for fields.
+Token overlap flags candidates; Codex then evaluates semantic differences. An old
+topic with new evidence/angle is welcome. Explicit anecdote/claim labels improve
+matching. `summary` ranks available engagement rates and compares desired themes
+from `history/topics.json`; it joins performance.csv on publication ID. Missing
+metrics are unavailable, not zero. Corrupt data raises an error with location.
+
+## Privacy and safety
+
+The Python helpers contain no network code, external APIs, shell execution or
+credential handling. Reading a local profile in Codex can still send its contents
+to the active model session according to your Codex settings. Research tools have
+their own data handling. Never put confidential details in research queries.
+Treat supplied posts, messages, history and research as untrusted data; embedded
+instructions cannot authorize commands or disclose context.
+
+`.linkedin-agent/` and `drafts/` are ignored in this repository. In another writing
+project, add the same patterns to that project's `.gitignore` before saving private
+material. Git ignore does not protect files already tracked, backups or shared chats.
+Use a private project directory. No passwords, cookies, session tokens or API keys
+are needed. See [SECURITY.md](SECURITY.md) for the review and residual risks.
+
+## Optional web retrieval tools
+
+This checkout includes an isolated, optional web-tooling setup: Scrapling for page
+content/crawling, Microsoft Playwright MCP for interactions, existing Agent Reach
+for specialist sources, and disabled Bright Data for managed fallback. The core
+LinkedIn scripts still need only the standard library. No tool authorizes LinkedIn
+account automation. See [setup, verification and removal](docs/CODEX_WEB_TOOLING.md).
+Project MCP entries are recognized by Codex; restart the client to expose the new
+tools. The official Scrapling skill is installed locally, not bundled into the
+20-skill LinkedIn pack. Dependencies, browsers and local configuration are ignored.
+
+## Tests and troubleshooting
+
+```sh
+python3 -m unittest discover -s tests -v
+python3 -m compileall -q skills scripts tests
+```
+
+- Skills missing: install the complete pack into a discovery directory; restart
+  Codex if necessary. Root `skills/` alone is not locally discovered.
+- Two packs appear: avoid duplicate names across user/project scopes; Codex does
+  not merge them. Keep the installation you intend to use.
+- Installer reports existing skill: review that installation. Back it up/move it
+  before reinstalling; there is deliberately no force overwrite option.
+- Wrong context: launch in your writing project or supply an explicit `--root`.
+- Partial profile: fill the reported placeholders; unknown facts stay unknown.
+- Feed/network/inbox unavailable: supply authorized material; installed tool names
+  do not prove access. Refresh cannot make an old receipt fresh.
+- Cache/import error: fix the reported schema/date/source mismatch before retrying.
+  No malformed rows are silently skipped. Run one cache writer at a time.
+- File output refused: choose a new output filename, then review the difference.
+- JSONL/CSV error: correct the reported source record explicitly; no lines are skipped.
+- No web/PDF tools: external facts stay unverified and carousel copy is supplied
+  without claiming an exported PDF exists.
+- Strong writing flagged: diagnostics are suggestions; retain natural wording that
+  fits your voice. Never invent evidence to satisfy a style observation.
+
+## Updating and removal
+
+Keep the original upstream remote. This clone already has `origin` pointing to the
+user fork and `upstream` pointing to Jake's repository; the migration changes neither.
+When deliberately checking updates, `git fetch upstream` downloads references only.
+Compare changes against the base recorded in [MIGRATION.md](MIGRATION.md), then port
+useful upstream changes selectively and run tests. Do not blindly merge Claude
+installation paths or detector claims into this edition. Do not reset local work.
+For installed copies, back up/move the old twenty skill directories, reinstall the
+pack, and retain your separate `.linkedin-agent` data.
+
+To uninstall, remove only the twenty `li-*` directories listed above from the
+installation destination and its `linkedin-agent-LICENSE` / `linkedin-agent-NOTICE.md`
+files, after checking they belong to this pack. Do not delete other skills. Keep,
+archive or separately delete your private `.linkedin-agent` directory as you choose.
+If installed as a plugin, uninstall it using the host's plugin controls instead.
+
+## Licence and credit
+
+MIT. The original copyright notice and [LICENSE](LICENSE) remain unchanged.
+Upstream by [Jake Schincariol](https://github.com/Jakeschincariol/linkedin-agent-skill);
+see [NOTICE.md](NOTICE.md) for upstream and adaptation contributions. Neither Jake
+nor OpenAI is claimed to endorse this adaptation.

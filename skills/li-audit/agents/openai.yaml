@@ -1,0 +1,6 @@
+interface:
+  display_name: "li-audit"
+  short_description: "LinkedIn audit workflow with human review"
+  default_prompt: "Use $li-audit to help with my LinkedIn audit workflow."
+policy:
+  allow_implicit_invocation: true

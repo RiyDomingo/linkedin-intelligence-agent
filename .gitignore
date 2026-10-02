@@ -3,3 +3,18 @@ __pycache__/
 *.pyc
 .venv/
 *.tmp
+
+# Private local context and draft material
+.linkedin-agent/
+.agents/skills/li-*/
+drafts/
+
+# Optional local retrieval dependencies, artifacts and secrets
+node_modules/
+.web-tools/
+.env
+.env.*
+!.env.example
+.agents/skills/scrapling-official/
+# Generated machine-specific MCP paths; portable template is tools/web/.
+.codex/config.toml

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "linkedin-intelligence-agent",
+  "version": "2.0.0",
+  "description": "LinkedIn Intelligence Agent: grounded research, read-aware recommendations, drafting and local quality skills for Codex. Human review and manual actions.",
+  "license": "MIT",
+  "keywords": [
+    "linkedin",
+    "writing",
+    "skills"
+  ]
+}

@@ -1,0 +1,2 @@
+# Optional agent tooling only; core LinkedIn scripts remain standard-library-only.
+scrapling[ai]==0.4.15

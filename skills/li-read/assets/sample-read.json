@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "source": {
+    "type": "manual",
+    "provider": "sample-only",
+    "identifier": "fictional-demo",
+    "retrieved_at": "2026-10-01T12:00:00Z",
+    "visibility": "public",
+    "confidence": null,
+    "url": null
+  },
+  "capabilities": [
+    "own_posts",
+    "own_comments",
+    "public_posts"
+  ],
+  "coverage": "partial",
+  "items": [
+    {
+      "kind": "post",
+      "id": "demo-p1",
+      "capability": "own_posts",
+      "data": {
+        "author": "Example user",
+        "author_id": "demo-user",
+        "timestamp": "2026-10-01T09:00:00Z",
+        "text": "We added a dependency field to our review checklist. We have not measured review time yet."
+      }
+    },
+    {
+      "kind": "comment",
+      "id": "demo-c1",
+      "capability": "own_comments",
+      "data": {
+        "author": "Example peer",
+        "author_id": "demo-peer",
+        "parent_post": "demo-p1",
+        "timestamp": "2026-10-01T11:00:00Z",
+        "text": "Have you measured review time after adding the dependency field?"
+      },
+      "assessment": {
+        "reply_expected": true
+      }
+    },
+    {
+      "kind": "comment",
+      "id": "demo-c2",
+      "capability": "own_comments",
+      "data": {
+        "author": "Example reader",
+        "parent_post": "demo-p1",
+        "timestamp": "2026-10-01T11:30:00Z",
+        "text": "Great post!"
+      }
+    },
+    {
+      "kind": "post",
+      "id": "demo-n1",
+      "capability": "public_posts",
+      "data": {
+        "author": "Example peer",
+        "author_id": "demo-peer",
+        "timestamp": "2026-10-01T10:00:00Z",
+        "text": "Our review checklist omitted a dependency. What should a checklist record?"
+      },
+      "assessment": {
+        "can_contribute": true,
+        "relevance": 1,
+        "note": "The user has an actual checklist change described in demo-p1; do not claim a measured result."
+      }
+    }
+  ]
+}

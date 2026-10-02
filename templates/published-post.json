@@ -1,0 +1,21 @@
+{
+  "id": "replace-with-stable-id",
+  "date": "2026-10-02",
+  "topic": "{{topic}}",
+  "angle": "{{angle}}",
+  "hook": "{{first line}}",
+  "body": "{{published copy}}",
+  "cta": "",
+  "tags": [],
+  "source_material": [],
+  "anecdotes": [],
+  "claims": [],
+  "metrics": {},
+  "project": null,
+  "company": null,
+  "author_id": null,
+  "parent_post": null,
+  "people_mentioned": [],
+  "evidence_used": [],
+  "related_research": []
+}

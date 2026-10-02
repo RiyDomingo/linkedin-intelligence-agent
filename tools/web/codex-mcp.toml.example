@@ -1,0 +1,29 @@
+# Project-local optional web tools. Generated paths by tools/web/configure.py.
+[mcp_servers.scrapling_local]
+command = "python3"
+args = [__LAUNCHER__, "scrapling"]
+startup_timeout_sec = 30
+tool_timeout_sec = 120
+required = false
+# GET-only usage policy is in AGENTS.md; make_request itself also supports writes.
+# Omit request-session and stealth tools from the default catalog.
+enabled_tools = ["make_request", "bulk_get", "fetch", "bulk_fetch", "open_session", "session_fetch", "close_session", "list_sessions", "screenshot"]
+
+[mcp_servers.playwright_local]
+command = "python3"
+args = [__LAUNCHER__, "playwright"]
+startup_timeout_sec = 30
+tool_timeout_sec = 120
+required = false
+# Excludes arbitrary JS evaluation and file uploads; interactions require task authorization.
+enabled_tools = ["browser_navigate", "browser_navigate_back", "browser_snapshot", "browser_find", "browser_click", "browser_fill_form", "browser_type", "browser_press_key", "browser_hover", "browser_wait_for", "browser_take_screenshot", "browser_tabs", "browser_close", "browser_handle_dialog"]
+
+[mcp_servers.brightdata_fallback]
+command = "python3"
+args = [__LAUNCHER__, "brightdata"]
+enabled = false
+required = false
+env_vars = ["API_TOKEN"]
+startup_timeout_sec = 30
+tool_timeout_sec = 120
+enabled_tools = ["search_engine", "scrape_as_markdown"]
