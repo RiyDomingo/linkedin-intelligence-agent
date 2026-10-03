@@ -11,6 +11,7 @@ import sys
 from read_layer import load_cache, config, status, safe_path, read_text
 from models import freshness, parse_time, provenance, timestamp, validate_value
 from context import load_history, duplicates, summarize, similarity
+import professional_memory
 
 CATEGORIES = ('IGNORE', 'READ', 'RESPOND', 'COMMENT', 'FOLLOW UP', 'CONTENT SIGNAL',
               'RELATIONSHIP SIGNAL', 'BUSINESS SIGNAL', 'RESEARCH SIGNAL')
@@ -149,6 +150,8 @@ def build_context(root, items):
     posts = load_history(root)
     own_ids.update(r['id'] for r in posts)
     return {'people': load_relationships(root), 'priorities': priorities(root),
+            'professional_context': professional_memory.summary(root, ['current_roles', 'expertise', 'interests', 'projects', 'content_topics', 'voice_patterns', 'goals', 'audiences']),
+            'strategic_context': professional_memory.get_strategic_context(root),
             'posts': posts, 'comments': load_history(root, 'comments'), 'own_post_ids': own_ids}
 
 
@@ -222,6 +225,8 @@ def brief(root, now=None, limit=5, include_private=False):
     return {'as_of': timestamp(now), 'actions': selected, 'suppressed_candidates': max(0, len(actions) - limit),
             'stale_or_undated': stale, 'read_status': status(root, now),
             'research_signals': external, 'research_gaps': research_gaps,
+            'professional_context': context['professional_context'],
+            'strategic_context': context['strategic_context'],
             'message': 'No supported material action found in available data; unavailable/stale sources may hide activity' if not selected else 'Review these priorities; all external actions remain manual',
             'action_boundary': 'No autonomous LinkedIn posting, commenting, liking, messaging, connecting or profile editing is implemented.'}
 

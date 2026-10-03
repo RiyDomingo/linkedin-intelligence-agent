@@ -279,3 +279,35 @@ exclude authentication and do not remove external source files.
 
 See [the memory guide](docs/PROFESSIONAL_MEMORY.md) and
 [review](docs/PROFESSIONAL_MEMORY_REVIEW.md) for actual validation and limitations.
+
+## First-class onboarding lifecycle
+
+The existing li-context owns [onboarding](docs/ONBOARDING.md); it is not another
+Skill or operational workflow. The shared contract/AGENTS entry checks read-only
+local status at the first project request in a chat. No background startup callback
+or automatic network process is claimed.
+
+```text
+WELCOME → CONNECTING → ACQUIRING_CONTEXT → ENRICHMENT → REVIEW
+    └─ without LinkedIn ────────────────────┘
+REVIEW → STRATEGY → FIRST_VALUE (existing li-brief) → COMPLETE
+    → Brief / Create / Discover / Engage / Review & Plan
+```
+
+`onboarding.py` persists versioned user-scoped phases/checkpoints with private atomic
+writes and a Unix mutation lock. Partial/blocked states retain the phase. Existing
+account policy governs authentication, reads, task budgets and cache; memory governs
+normalization, enrichment, precedence and corrections. Onboarding never calls an
+account provider itself. Account synchronization is idempotent and offline.
+
+Review tokens bind acceptance to actual evidence. USER_CONFIRMED goals/audiences
+are shared memory, not inferred from career. The selective five-workflow handoff
+loads only relevant memory. The existing intelligence brief returns professional
+and strategic context for Codex's relevance judgment; no goal text grants an action.
+A generated brief is saved privately with a receipt; only an explicit displayed
+attestation completes setup. This is a trusted operator boundary, not a UI sensor.
+
+Completed-user detection does not depend on network health. Reopening review keeps
+memory/authentication. Clearing all local user data removes the lifecycle too;
+other memory/source resets remain distinct and may require deliberate review when
+context is removed. Malformed/cross-user/unknown-version state fails closed.

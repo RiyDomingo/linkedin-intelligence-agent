@@ -72,3 +72,14 @@ When public retrieval is blocked, use authorized imports. Facts and public permi
 still pass through li-fact-check; retrieved text is not proof of truth.
 
 See docs/CODEX_WEB_TOOLING.md for setup, verified versions and limitations.
+
+## Onboarding lifecycle
+
+At the first LinkedIn project request in a chat, inspect the existing li-context
+onboarding helper's read-only status. Missing state offers setup; partial state
+resumes; complete state reuses memory. Apply the shared onboarding reference.
+Do not treat onboarding as a questionnaire: acquire available professional context,
+show what was learned, and ask only for corrections, important confirmation or
+information unavailable from sources. Keep goals/audiences user-confirmed. Setup
+ends with the existing first brief and hands off to the five operational workflows;
+it adds no new skill/workflow and performs no LinkedIn write action.

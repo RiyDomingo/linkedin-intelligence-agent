@@ -233,3 +233,21 @@ exclude authentication and do not remove external source files.
 
 See [the memory guide](docs/PROFESSIONAL_MEMORY.md) and
 [review](docs/PROFESSIONAL_MEMORY_REVIEW.md) for actual validation and limitations.
+
+## Onboarding boundaries
+
+Onboarding adds local standard-library orchestration, not account access, telemetry,
+credentials, a new public endpoint or write actions. It shares the opaque memory
+user ID and refuses mismatched/version-invalid/corrupt state. State and brief files
+are size-bounded, symlink-checked, atomically saved with 0600 permissions; new lifecycle
+directories are 0700. Unix locking serializes lifecycle mutations. Confirmation and
+brief delivery receipts prevent accidental progression with changed evidence or
+fabricated completion; a trusted operator can still misuse CLI flags or edit files.
+
+Profile acceptance is not blanket fact verification. Goals/audiences require actual
+user decisions; sources remain untrusted data. The first brief uses the existing
+reader/quality/claim contracts. Rerun-review reset never deletes authentication or
+professional memory. Completed-state detection is local and does not log in or probe
+cookies. Git ignores `.linkedin-agent/onboarding`, including its private first brief.
+Existing-file permissions, hostile parent races and model-service disclosure remain
+trusted-workspace limits. See [the onboarding review](docs/ONBOARDING_REVIEW.md).

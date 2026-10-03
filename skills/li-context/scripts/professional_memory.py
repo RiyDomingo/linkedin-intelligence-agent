@@ -20,7 +20,7 @@ from context import safe_path, read_text, load_history
 FIELDS = ('person','current_roles','experience','education','qualifications','skills',
           'expertise','projects','companies','achievements','awards','publications',
           'interests','positioning','audiences','content_topics','voice_patterns',
-          'relationships','claims','constraints')
+          'relationships','claims','constraints','goals')
 KINDS = ('FACT','POSITIONING','INTEREST','EXPERTISE','VOICE','CONSTRAINT')
 RANK = {'USER_CONFIRMED':0,'USER_DOCUMENT':1,'LINKEDIN_OBSERVED':2,
         'USER_LINKED_WEBSITE':3,'PUBLIC_WEB':4,'LOCAL_HISTORY':5,'INFERRED':6}
@@ -288,6 +288,20 @@ def summary(root,fields=None,include_evidence=False):
             if '{{' not in text and text.strip():
                 guard(text);result['curated_context'].append({'path':relative,'text':text,'precedence':'CURATED_USER_DECISIONS'})
     return result
+
+def get_strategic_context(root):
+    """Current deliberate goals/audiences; never infer intent from professional facts."""
+    snapshot = summary(root, ['goals', 'audiences'])
+    result = {'goals': [], 'audiences': []}
+    for group in snapshot['context']:
+        item = group['preferred']
+        if item and item['label'] == 'USER_CONFIRMED' and item['freshness'] == 'CURRENT' and item['temporally_current']:
+            result[group['field']].append(item['value'])
+    if not result['audiences']:
+        result['audiences'] = [item['text'] for item in snapshot.get('curated_context', [])
+                               if item['path'] == 'identity/audience.md']
+    return result
+
 
 def get_current_roles(root):return summary(root,['current_roles'])
 def get_expertise(root):return summary(root,['expertise','qualifications','skills'])

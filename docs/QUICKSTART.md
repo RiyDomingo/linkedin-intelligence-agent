@@ -72,6 +72,11 @@ newly installed Skills are not visible. Ask:
 
 Expected: a usable draft, no LinkedIn action.
 
+For guided first-run onboarding, ask “Set up my LinkedIn Intelligence Agent.”
+Codex offers account connection or the no-account path, optional sources, a review,
+and the two missing strategic choices, then gives your first brief. Progress
+survives interrupted chats. See [Onboarding](ONBOARDING.md).
+
 For account-based onboarding, continue to Step 5. Codex can use your own observed
 posts to propose voice traits, with uncertainty clearly labelled. You do not need
 to paste your profile or posts when that connection succeeds.
@@ -107,3 +112,10 @@ current role.” Conflicts and sources remain visible; user corrections persist.
 Most writing/context tasks reuse local memory and need no fresh account access.
 
 See [the memory guide](PROFESSIONAL_MEMORY.md) for source management, privacy, export and reset.
+
+## Returning to the agent
+
+Open the same project in Codex and ask for Brief me, Create, Discover, Engage, or
+Review & Plan. Completed setup is reused; offline context tasks remain available.
+“Rerun setup review” reopens review without deleting memory or authentication.
+See [the five workflows](WORKFLOWS.md).

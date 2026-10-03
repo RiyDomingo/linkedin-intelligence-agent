@@ -6,6 +6,16 @@ it reuse your career, interests, voice and recent work without asking you to rep
 available information in every conversation. Claims remain evidence-linked and
 unverified unless reviewed; missing information stays unknown.
 
+## Onboarding and strategy
+
+[Onboarding](ONBOARDING.md) now persists setup progress separately from professional
+memory. Goals join the generic memory fields; audiences remain in the existing
+field. Explicit choices are USER_CONFIRMED and available to all five workflows.
+A filled curated audience file remains authoritative and avoids a repeat question.
+General profile acceptance records review rather than upgrading every inference.
+Changing goals/audiences after setup does not restart it. Rerunning setup review
+keeps memory and login; source/memory/data reset operations remain separate.
+
 ## Getting started in Codex
 
 Open the project and ask:

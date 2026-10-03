@@ -144,6 +144,18 @@ your account and personalize it. The [one-page quickstart](QUICKSTART.md) is ava
 
 ## First Run
 
+First-run setup follows **Connect → Learn → Enrich → Confirm → First Brief**.
+Ask “Set up my LinkedIn Intelligence Agent.” Codex offers account connection or a
+normal no-account path, learns from available sources, presents a professional
+preview, and asks only missing goals and important audiences. It then gives a real
+brief and presents Brief me, Create, Discover, Engage, Review & Plan.
+
+Progress is saved locally. An interrupted chat resumes its recorded stage; a completed
+user reuses memory even when offline. Optional sources can be added later. The
+steps below explain the components; Codex normally guides you through them without
+manual file editing. See [the complete lifecycle](ONBOARDING.md) and
+[the five operational workflows](WORKFLOWS.md).
+
 ### Step 5 — Connect LinkedIn and build your profile context
 
 **Ask Codex:**

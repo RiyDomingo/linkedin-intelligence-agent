@@ -5,6 +5,11 @@ description: "Set up or maintain my private professional memory: add/replace a r
 
 # li-context
 
+For first-run setup, interrupted setup or “rerun setup review”, apply
+[the onboarding lifecycle](references/onboarding.md). Its local state governs
+progress; it hands off to the existing five workflows after the first brief.
+Returning users reuse memory. Onboarding adds no user-facing skill.
+
 Read [the shared contract](references/context-contract.md). Initialize with
 `python3 <this-skill>/scripts/context.py --root <project>/.linkedin-agent init`.
 Show the files created. Help fill relevant identity and knowledge templates from

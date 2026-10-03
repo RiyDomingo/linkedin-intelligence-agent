@@ -7,6 +7,13 @@ description: "Review my LinkedIn and identify what deserves attention today, inc
 
 Read [the shared contract](../li-context/references/context-contract.md) first.
 
+For the onboarding first brief, load confirmed goals/audiences and the professional
+preview from li-context. `onboarding.py run-brief` calls the same intelligence helper
+below; interpret its evidence, prioritize for those goals/audiences, and show useful
+output before `deliver --displayed`. Zero supported actions is valid. Onboarding
+may use this brief without another research/account read when existing evidence is
+sufficient. Never present CLI draft placeholders as finished copy.
+
 1. Apply [li-read](../li-read/SKILL.md). Inspect status, refresh legitimate available
    account reads through the restricted gateway when needed; identify cache/import
    alternatives explicitly on failure, without claiming live success. Report gaps and dates; don't claim to see a feed

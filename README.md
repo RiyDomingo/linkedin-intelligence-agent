@@ -21,8 +21,7 @@ You stay in control.
 Open this repository as a local project in Codex. Install the 20 Skills and create
 private context using the [Quickstart](docs/QUICKSTART.md), then ask:
 
-> Set up the restricted LinkedIn account connector. Read my profile and own posts,
-> build my professional context, and tell me what deserves my attention.
+> Set up my LinkedIn Intelligence Agent.
 
 You sign in yourself in the connector's dedicated browser if needed. Signing in to
 LinkedIn in another browser tab does not connect this gateway. After onboarding,
@@ -33,6 +32,24 @@ There is no standalone app or background service to launch: the Skills run in yo
 Codex chat, and the optional account gateway supplies bounded reads. Comments,
 inbox, connections and analytics require authorized additional data; the connector
 currently reads only your own profile, own posts and a feed sample.
+
+## First-run onboarding
+
+**Connect → Learn → Enrich → Confirm → First Brief**
+
+Codex offers LinkedIn connection first and can learn from bounded account reads.
+You may instead continue with a CV, bio, website or authorized local context. Optional
+sources enrich memory; Codex shows what it learned with observed/inferred/confirmed
+labels so you can correct it. It asks only for missing goals and important audiences,
+then delivers your first intelligence brief with 0–5 useful actions.
+
+Setup progress survives interrupted chats. Completed users reuse local memory,
+including offline, rather than repeating setup. A new account challenge pauses reads
+without deleting context. See [Onboarding](docs/ONBOARDING.md).
+
+After setup, use **Brief me**, **Create**, **Discover**, **Engage**, or **Review & Plan**.
+These [five operational workflows](docs/WORKFLOWS.md) compose the existing 20 Skills;
+onboarding adds no new Skill or sixth workflow.
 
 ## Reusable professional context
 
@@ -559,6 +576,9 @@ For the shortest setup path:
 
 - [Beginner Setup](docs/BEGINNER_SETUP.md)
 - [Quickstart](docs/QUICKSTART.md)
+- [Onboarding Lifecycle](docs/ONBOARDING.md)
+- [Five Operational Workflows](docs/WORKFLOWS.md)
+- [Onboarding Review](docs/ONBOARDING_REVIEW.md)
 - [Architecture](ARCHITECTURE.md)
 - [Security](SECURITY.md)
 - [Research & Web Tooling](docs/CODEX_WEB_TOOLING.md)
@@ -578,9 +598,10 @@ For the shortest setup path:
 
 **Current validation: PASS WITH LIMITATIONS**
 
-The account-connected and professional-memory implementation passes **453 core automated tests** plus
-**9 optional MCP tests**. All 20 Skills validate. The suite includes 81 new memory/onboarding tests.
-See [the memory review](docs/PROFESSIONAL_MEMORY_REVIEW.md). Live profile, own-post and feed
+The account-connected and professional-memory implementation passes **530 core automated tests** plus
+**9 optional MCP tests**. All 20 Skills validate. The suite includes 81 memory/enrichment tests and 77 additional lifecycle/handoff tests.
+See [the onboarding review](docs/ONBOARDING_REVIEW.md) and
+[the memory review](docs/PROFESSIONAL_MEMORY_REVIEW.md). Live profile, own-post and feed
 reads, dedicated-session reuse and a private brief/draft were exercised. A new
 manual login and real authentication challenge were not exercised; see the
 [account acceptance review](docs/ACCOUNT_CONNECTOR_REVIEW.md).

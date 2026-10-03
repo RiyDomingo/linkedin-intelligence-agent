@@ -127,3 +127,12 @@ A replacement is staged as pending until normalized evidence validates successfu
 Failed or empty extraction leaves the previous working version usable. Each version
 retains its own source reference/hash/date; historical audit is not falsely attributed
 to the new file. Refresh plans report pending normalization separately from freshness.
+
+## Onboarding strategy
+
+The generic `goals` field and existing `audiences` field hold explicit strategic
+choices. `get_strategic_context` loads current USER_CONFIRMED decisions, with an
+already-filled curated audience file as authoritative fallback. Career/interest
+observations never create goals automatically. The lifecycle uses this shared API;
+the brief and other five-workflow handoffs use it without importing lifecycle state.
+See [onboarding](onboarding.md) for review, persistence and first-value transitions.

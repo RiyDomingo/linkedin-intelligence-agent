@@ -205,3 +205,18 @@ exclude authentication and do not remove external source files.
 
 See [the memory guide](docs/PROFESSIONAL_MEMORY.md) and
 [review](docs/PROFESSIONAL_MEMORY_REVIEW.md) for actual validation and limitations.
+
+## Onboarding lifecycle (3 October 2026)
+
+Added persistent product setup to existing li-context, without increasing the 20
+Skills or five operational workflows. New onboarding.py and progressively loaded
+reference compose restricted account reads, optional source enrichment, evidence
+review, confirmed strategy and the existing first brief. Added the generic `goals`
+memory field; version-1 stores stay readable. The brief now includes shared
+professional/strategic context. No provider/authentication architecture was replaced.
+
+New lifecycle tests cover fresh/returning users, interruption, no-account completion,
+partial reads, sources/conflicts/corrections, strategy, real signal/zero-action brief
+handoff, receipt/state validation and privacy. Documentation separates synthetic
+lifecycle validation from the earlier real account acceptance. No commit or push
+was made for this milestone.

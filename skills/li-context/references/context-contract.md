@@ -4,6 +4,28 @@ Apply this contract before preparing content under the user's name. Composition
 means reading related logic; support skills perform their own stage without
 recursively invoking themselves or rerunning the entire writing pipeline.
 
+## Onboarding and strategic context
+
+At the first project request in a chat, inspect sibling `scripts/onboarding.py
+--root <project>/.linkedin-agent status`. Missing state means first-run onboarding;
+partial/blocked state resumes its recorded stage; complete means normal use with
+existing memory, including offline. Read [the lifecycle](onboarding.md) when setup
+is needed/requested. Offer it briefly alongside a specific task; preserve the
+user's task and do not force setup before a simple rewrite.
+
+Do not treat onboarding as a questionnaire. Acquire available professional context
+first, present what was learned, and ask only for corrections, important confirmation,
+or information unavailable from sources. Before any context question inspect fresh
+observations, user documents, curated context and confirmed memory. Reask only for
+missing essential information, material conflicts or stale unrefreshable information.
+Goals are strategic intent, not deductions from a title. Use `onboarding.py strategy`
+or `onboarding.py workflow <brief|create|discover|engage|review_plan>` for selective
+context in Brief,
+Create, Discover, Engage and Review & Plan. User selections persist as USER_CONFIRMED;
+current instructions remain authoritative. Suggested audiences come from actual
+professional context and remain suggestions until selected. Do not auto-confirm
+new interests/expertise; ask occasionally when a consequential inference matters.
+
 ## Data location and progressive retrieval
 
 The data root is `<user-selected project>/.linkedin-agent`, independent of the
