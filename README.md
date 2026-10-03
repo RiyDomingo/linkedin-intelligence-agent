@@ -18,10 +18,26 @@ You stay in control.
 
 ## Start in the Codex desktop app
 
-Open this repository as a local project in Codex. Install the 20 Skills and create
-private context using the [Quickstart](docs/QUICKSTART.md), then ask:
+Download or clone this repository and open its folder as a local project in Codex
+desktop. Then paste this into the chat:
 
-> Set up my LinkedIn Intelligence Agent.
+> Set up LinkedIn Intelligence Agent for me. Check prerequisites, run the installation
+> and configuration, and guide me through onboarding. Handle the commands yourself
+> and pause only when you need my login, approval or decisions.
+
+Codex can check the existing setup, install the 20 Skills, create private local
+context, configure the optional connector and browser, and guide you through your
+first brief. You normally do not need to run Terminal commands or edit configuration
+files yourself. If a prerequisite or permission is unavailable, Codex should explain
+the specific blocker and the smallest step needed to continue.
+
+You still sign in to LinkedIn and complete verification yourself, confirm or correct
+what the agent learned, and choose your goals and important audiences. Approve
+installation permissions if your client requests them. Never put a password in chat.
+
+Use the [Beginner Setup Guide](docs/BEGINNER_SETUP.md) if you need help getting the
+repository open. The [Quickstart](docs/QUICKSTART.md) also includes manual commands
+for users who prefer them and for troubleshooting.
 
 You sign in yourself in the connector's dedicated browser if needed. Signing in to
 LinkedIn in another browser tab does not connect this gateway. After onboarding,

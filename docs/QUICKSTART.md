@@ -6,6 +6,28 @@ Core writing needs no Node, npm, research provider or LinkedIn login. For accoun
 onboarding, also follow Step 5: the isolated connector requires uv and Python 3.12
 and you sign in manually in its dedicated browser. See [connector setup](ACCOUNT_CONNECTOR.md).
 
+## Recommended: ask Codex to set it up
+
+Download or clone the repository, open its folder in Codex desktop, and paste:
+
+> Set up LinkedIn Intelligence Agent for me. Check prerequisites, run the installation
+> and configuration, and guide me through onboarding. Handle the commands yourself
+> and pause only when you need my login, approval or decisions.
+
+Codex can check the existing setup, install the 20 Skills, create private local
+context, configure the optional connector and browser, and guide you through your
+first brief. You normally do not need to run Terminal commands or edit configuration
+files yourself. If a prerequisite or permission is unavailable, Codex should explain
+the specific blocker and the smallest step needed to continue.
+
+You still sign in to LinkedIn and complete verification yourself, confirm or correct
+what the agent learned, and choose your goals and important audiences. Approve
+installation permissions if your client requests them. Never put a password in chat.
+
+For help getting the folder open, use the [Beginner Setup Guide](BEGINNER_SETUP.md).
+The numbered commands below are the manual alternative and troubleshooting path;
+Codex can execute them for you. Optional public research setup is separate.
+
 ## 1. Check prerequisites
 
 In Terminal, from any folder, check Python:

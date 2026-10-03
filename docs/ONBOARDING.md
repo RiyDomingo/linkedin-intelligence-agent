@@ -2,7 +2,19 @@
 
 Open this project in the Codex desktop app and ask:
 
-> Set up my LinkedIn Intelligence Agent.
+> Set up LinkedIn Intelligence Agent for me. Check prerequisites, run the installation
+> and configuration, and guide me through onboarding. Handle the commands yourself
+> and pause only when you need my login, approval or decisions.
+
+Codex can check the existing setup, install the 20 Skills, create private local
+context, configure the optional connector and browser, and guide you through your
+first brief. You normally do not need to run Terminal commands or edit configuration
+files yourself. If a prerequisite or permission is unavailable, Codex should explain
+the specific blocker and the smallest step needed to continue.
+
+You still sign in to LinkedIn and complete verification yourself, confirm or correct
+what the agent learned, and choose your goals and important audiences. Approve
+installation permissions if your client requests them. Never put a password in chat.
 
 Setup is a conversation in Codex, with progress saved locally. There is no separate
 wizard application to launch. The existing 20 Skills support this lifecycle; it is

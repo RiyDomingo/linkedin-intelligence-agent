@@ -14,11 +14,43 @@ research browsers do not grant account access.
 
 The commands below were checked on **macOS**, including a temporary project folder containing spaces. Linux and Windows have not been fully validated. Windows uses different virtual-environment paths; do not copy the optional macOS commands into PowerShell.
 
+## Recommended: let Codex handle setup
+
+Get this repository onto your computer using [Step 2](#step-2--download-the-project-or-open-the-copy-you-already-have),
+then open that folder as a local project in Codex desktop. Ask in the chat:
+
+> Set up LinkedIn Intelligence Agent for me. Check prerequisites, run the installation
+> and configuration, and guide me through onboarding. Handle the commands yourself
+> and pause only when you need my login, approval or decisions.
+
+Codex can check the existing setup, install the 20 Skills, create private local
+context, configure the optional connector and browser, and guide you through your
+first brief. You normally do not need to run Terminal commands or edit configuration
+files yourself. If a prerequisite or permission is unavailable, Codex should explain
+the specific blocker and the smallest step needed to continue.
+
+You still sign in to LinkedIn and complete verification yourself, confirm or correct
+what the agent learned, and choose your goals and important audiences. Approve
+installation permissions if your client requests them. Never put a password in chat.
+
+Codex should preserve an existing installation and local context, check what's
+already working, and resume incomplete onboarding. Installing optional account
+access still needs the connector prerequisites and your connection choice; it does
+not grant permission for LinkedIn posting or messaging. Optional public research
+providers are separate and need not be installed for ordinary setup.
+
+The detailed commands below are the **manual alternative and troubleshooting path**.
+If you use Codex-led setup, let Codex execute the relevant commands; you do not need
+to copy them into Terminal. You will still review the resulting professional context
+and receive the first brief in chat.
+
 Jump to [Fastest Setup](#fastest-setup), [First Run](#first-run),
 [imports](#give-the-agent-linkedin-information), [optional research](#optional-enable-web-research),
 or [troubleshooting](#troubleshooting). You can stop before optional research.
 
 ## Fastest Setup
+
+This section explains the manual path. For Codex-led setup, use the prompt above.
 
 **Required:** a local Codex client, Git and Python 3.10 or later. You do **not** need Node, npm, a virtual environment, a research-provider account, an API key or LinkedIn credentials for this path.
 
